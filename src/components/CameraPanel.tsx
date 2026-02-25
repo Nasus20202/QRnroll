@@ -1,11 +1,43 @@
-import { CheckCircle2, ScanLine, ZoomIn, ZoomOut } from 'lucide-react'
+import {
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Loader2,
+  ScanLine,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react'
 import type { RefObject } from 'react'
+import type { Status } from '@/pages/ScannerPage'
 
 export type CameraPanelProps = {
   videoRef: RefObject<HTMLVideoElement | null>
   onZoom: (delta: number) => void
   scanned: string | null
-  status: string
+  status: Status
+}
+
+const statusStyles: Record<Status['kind'], string> = {
+  idle: 'text-slate-400',
+  submitting: 'text-slate-300',
+  success: 'text-emerald-400',
+  error: 'text-red-400',
+  info: 'text-sky-400',
+}
+
+const StatusIcon = ({ kind }: { kind: Status['kind'] }) => {
+  switch (kind) {
+    case 'submitting':
+      return <Loader2 size={14} className="animate-spin text-slate-300" />
+    case 'success':
+      return <CheckCircle2 size={14} className="text-emerald-400" />
+    case 'error':
+      return <AlertCircle size={14} className="text-red-400" />
+    case 'info':
+      return <Info size={14} className="text-sky-400" />
+    default:
+      return null
+  }
 }
 
 export function CameraPanel({
@@ -25,7 +57,7 @@ export function CameraPanel({
             Scan attendance code
           </h1>
           <p className="text-sm text-slate-300">
-            Aim at the room’s QR. Zoom if it’s far.
+            Aim at the room's QR. Zoom if it's far.
           </p>
         </div>
         <div className="flex gap-2">
@@ -66,13 +98,21 @@ export function CameraPanel({
       <div className="mt-3 flex items-center gap-3 text-sm text-slate-200">
         {scanned ? (
           <>
-            <CheckCircle2 className="text-emerald-400" size={18} />
+            <CheckCircle2 className="text-emerald-400 shrink-0" size={18} />
             <span className="truncate max-w-[60%]">{scanned}</span>
           </>
         ) : (
           <span className="text-slate-400">Waiting for scan…</span>
         )}
-        <span className="ml-auto text-xs text-slate-400">{status}</span>
+
+        {status.message && (
+          <div
+            className={`ml-auto flex items-center gap-1 text-xs ${statusStyles[status.kind]}`}
+          >
+            <StatusIcon kind={status.kind} />
+            <span>{status.message}</span>
+          </div>
+        )}
       </div>
     </div>
   )

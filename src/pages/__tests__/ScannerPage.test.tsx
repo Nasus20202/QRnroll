@@ -60,8 +60,9 @@ describe('ScannerPage', () => {
     await waitFor(() => expect(decodeCallback).toBeTruthy())
     decodeCallback?.({ getText: () => 'scanned-code' }, null)
 
+    await waitFor(() => expect(screen.getByText('scanned-code')).toBeTruthy())
     await waitFor(() => expect(submitCode).toHaveBeenCalledWith('scanned-code'))
-    expect(screen.getByText(/saved|duplicate/i)).toBeTruthy()
+    await waitFor(() => expect(screen.getByText('Saved')).toBeTruthy())
   })
 
   it('copies and opens codes from list', async () => {

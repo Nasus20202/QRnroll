@@ -11,7 +11,7 @@ describe('CameraPanel', () => {
         videoRef={{ current: document.createElement('video') }}
         onZoom={onZoom}
         scanned={null}
-        status=""
+        status={{ kind: 'idle', message: '' }}
       />,
     )
 
@@ -29,7 +29,7 @@ describe('CameraPanel', () => {
         videoRef={{ current: document.createElement('video') }}
         onZoom={onZoom}
         scanned="abc"
-        status="Saved"
+        status={{ kind: 'success', message: 'Saved' }}
       />,
     )
 
