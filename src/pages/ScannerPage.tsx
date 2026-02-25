@@ -31,10 +31,13 @@ export default function ScannerPage({
   useEffect(() => {
     const init = async () => {
       try {
-        const devices = await BrowserMultiFormatReader.listVideoInputDevices()
+        const devices =
+          (await BrowserMultiFormatReader.listVideoInputDevices()) ?? []
         if (!devices.length) return
         const deviceId = devices[0].deviceId
-        if (!videoRef.current) return
+        if (!videoRef.current) {
+          videoRef.current = document.createElement('video')
+        }
         await reader.decodeFromVideoDevice(
           deviceId,
           videoRef.current,
@@ -93,7 +96,7 @@ export default function ScannerPage({
 
   useEffect(() => {
     void refreshCodes()
-    const id = setInterval(() => void refreshCodes(), 500)
+    const id = setInterval(() => void refreshCodes(), 1000)
     return () => clearInterval(id)
   }, [])
 

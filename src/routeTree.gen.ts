@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as EnrollRouteImport } from './routes/enroll'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as EnrollTestRouteImport } from './routes/enroll.test'
+import { Route as EnrollTestRouteImport } from './routes/enroll/test'
 
 const EnrollRoute = EnrollRouteImport.update({
   id: '/enroll',

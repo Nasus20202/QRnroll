@@ -22,7 +22,11 @@ function useLiveCodes(fetchCodes: () => Promise<CodesResponse>) {
         if (!mounted) return
         setCodes(list)
         if (!list.length) {
-          setStatus('Waiting for valid codes…')
+          // Only reset to waiting if we have never opened a code yet; otherwise keep the
+          // previous status so recent openings remain visible to the user (and tests).
+          if (!openedRef.current.size) {
+            setStatus('Waiting for valid codes…')
+          }
           return
         }
         let openedAny = false

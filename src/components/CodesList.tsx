@@ -22,7 +22,7 @@ export function CodesList({
 
   useEffect(() => {
     setNow(Date.now())
-    const timer = setInterval(() => setNow(Date.now()), 500)
+    const timer = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(timer)
   }, [])
 

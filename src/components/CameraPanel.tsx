@@ -32,16 +32,20 @@ export function CameraPanel({
           <button
             type="button"
             onClick={() => onZoom(0.1)}
+            aria-label="Zoom in"
             className="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 flex items-center gap-1"
           >
             <ZoomIn size={16} />
+            <span className="sr-only">Zoom in</span>
           </button>
           <button
             type="button"
             onClick={() => onZoom(-0.1)}
+            aria-label="Zoom out"
             className="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600"
           >
             <ZoomOut size={16} />
+            <span className="sr-only">Zoom out</span>
           </button>
         </div>
       </header>
