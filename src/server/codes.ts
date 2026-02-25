@@ -1,6 +1,4 @@
 import { createServerFn } from '@tanstack/react-start'
-import { env } from 'cloudflare:workers'
-
 import { codePayloadSchema, listCodes, saveCode } from '@/lib/kv'
 import { fanOutWebhooks } from '@/lib/webhooks'
 
@@ -9,16 +7,20 @@ export const postCode = createServerFn({ method: 'POST' }).handler(
     const parse = codePayloadSchema.safeParse(data)
     if (!parse.success) {
       return Response.json(
-        { ok: false, error: parse.error.format() },
+        { ok: false, error: parse.error.message },
         { status: 400 },
       )
     }
 
     const { code } = parse.data
-    const stored = await saveCode(env, code)
+    const stored = await saveCode(code)
     if (stored.stored) {
-      await fanOutWebhooks(env, { code, ts: stored.record?.ts ?? Date.now() })
+      const ts = stored.record?.ts ?? Date.now()
+      await fanOutWebhooks(
+        `[QR code received at ${new Date(ts).toISOString()}](${code})`,
+      )
     }
+    console.log('[submit] code:', code, 'stored:', stored.stored)
     return {
       ok: true,
       stored: stored.stored,
@@ -30,7 +32,7 @@ export const postCode = createServerFn({ method: 'POST' }).handler(
 
 export const getCodes = createServerFn({ method: 'GET' }).handler(async () => {
   const now = Date.now()
-  const codes = await listCodes(env)
+  const codes = await listCodes()
   return codes.filter((c) => now - c.ts <= 15_000)
 })
 

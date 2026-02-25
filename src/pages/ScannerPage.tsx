@@ -31,8 +31,7 @@ export default function ScannerPage({
   useEffect(() => {
     const init = async () => {
       try {
-        const devices =
-          (await BrowserMultiFormatReader.listVideoInputDevices()) ?? []
+        const devices = await BrowserMultiFormatReader.listVideoInputDevices()
         if (!devices.length) return
         const deviceId = devices[0].deviceId
         if (!videoRef.current) {

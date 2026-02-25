@@ -1,10 +1,14 @@
 //  @ts-check
 
+import tseslint from '@typescript-eslint/eslint-plugin'
 import { tanstackConfig } from '@tanstack/eslint-config'
 
 export default [
   ...tanstackConfig,
   {
+    plugins: {
+      '@typescript-eslint': tseslint,
+    },
     rules: {
       'import/no-cycle': 'off',
       'import/order': 'off',

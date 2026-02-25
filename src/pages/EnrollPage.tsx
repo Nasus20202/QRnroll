@@ -63,6 +63,13 @@ function useLiveCodes(fetchCodes: () => Promise<CodesResponse>) {
 export default function EnrollPage({ fetchCodes }: EnrollPageProps) {
   const { codes, status, lastOpened } = useLiveCodes(fetchCodes)
 
+  useEffect(() => {
+    const newWindow = window.open('Please allow popups for this site', '_blank')
+    if (newWindow) {
+      newWindow.close()
+    }
+  }, [])
+
   const handleCopy = async (code: string) => {
     await navigator.clipboard.writeText(code)
   }
@@ -84,22 +91,10 @@ export default function EnrollPage({ fetchCodes }: EnrollPageProps) {
         <h1 className="text-2xl font-semibold text-white">Enroll redirect</h1>
         <p className="text-slate-300 text-sm">
           This page watches for valid codes and opens each one in a new tab as
-          soon as it appears. Keep this tab open.
+          soon as it appears. Keep this tab open. Please allow popups for this
+          site, and make sure your browser is not blocking them.
         </p>
         <LiveStatus status={status} lastOpened={lastOpened} />
-        <button
-          type="button"
-          onClick={() =>
-            window.open('/enroll/test', '_blank', 'noopener,noreferrer')
-          }
-          className="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 text-sm text-slate-100"
-        >
-          Open test page (grant popup permission)
-        </button>
-        <p className="text-xs text-slate-500">
-          Pop-up blockers may prevent opening the code; allow pop-ups for this
-          site if needed.
-        </p>
       </div>
 
       <div className="space-y-3">

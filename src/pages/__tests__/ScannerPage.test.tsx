@@ -1,5 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import ScannerPage from '../ScannerPage'
+import type { CodeItem, ScannerPageProps } from '../ScannerPage'
 
 let decodeCallback:
   | ((result: { getText: () => string }, err: unknown) => void)
@@ -9,10 +11,16 @@ vi.mock('@zxing/browser', () => {
   const listVideoInputDevices = vi.fn().mockResolvedValue([{ deviceId: 'dev' }])
 
   class MockReader {
-    decodeFromVideoDevice = vi.fn((_id: string, _video: unknown, cb: any) => {
-      decodeCallback = cb
-      return Promise.resolve(undefined)
-    })
+    decodeFromVideoDevice = vi.fn(
+      (
+        _id: string,
+        _video: unknown,
+        cb: (result: { getText: () => string } | null, err: unknown) => void,
+      ) => {
+        decodeCallback = cb
+        return Promise.resolve(undefined)
+      },
+    )
     reset = vi.fn()
     static listVideoInputDevices = listVideoInputDevices
   }
@@ -22,9 +30,6 @@ vi.mock('@zxing/browser', () => {
     listVideoInputDevices,
   }
 })
-
-import ScannerPage from '../ScannerPage'
-import type { CodeItem, ScannerPageProps } from '../ScannerPage'
 
 describe('ScannerPage', () => {
   const submitCode = vi.fn<ScannerPageProps['submitCode']>()

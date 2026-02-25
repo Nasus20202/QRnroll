@@ -2,34 +2,44 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { fanOutWebhooks, getWebhookTargets } from '../webhooks'
 
+const originalEnv = { ...process.env }
+
+const resetEnv = () => {
+  process.env.WEBHOOK_URLS = originalEnv.WEBHOOK_URLS
+  process.env.WEBHOOK_URL = originalEnv.WEBHOOK_URL
+}
+
 describe('getWebhookTargets', () => {
-  it('splits comma-separated URLs and trims blanks', () => {
-    const env = { WEBHOOK_URLS: ' https://a.test , https://b.test,, ' } as Env
-    expect(getWebhookTargets(env)).toEqual(['https://a.test', 'https://b.test'])
+  afterEach(() => {
+    resetEnv()
   })
 
-  it('falls back to WEBHOOK_URL', () => {
-    const env = { WEBHOOK_URL: 'https://single.test' } as Env
-    expect(getWebhookTargets(env)).toEqual(['https://single.test'])
+  it('splits comma-separated URLs and trims blanks', () => {
+    process.env.WEBHOOK_URLS = ' https://a.test , https://b.test,, '
+    expect(getWebhookTargets()).toEqual(['https://a.test', 'https://b.test'])
   })
 
   it('returns empty array when nothing set', () => {
-    expect(getWebhookTargets({} as Env)).toEqual([])
+    process.env.WEBHOOK_URLS = ''
+    expect(getWebhookTargets()).toEqual([])
   })
 })
 
 describe('fanOutWebhooks', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    resetEnv()
   })
 
   afterEach(() => {
     vi.useRealTimers()
     vi.restoreAllMocks()
+    resetEnv()
   })
 
   it('returns empty when no targets', async () => {
-    const results = await fanOutWebhooks({} as Env, { code: 'x' })
+    process.env.WEBHOOK_URLS = ''
+    const results = await fanOutWebhooks('x')
     expect(results).toEqual([])
   })
 
@@ -39,8 +49,8 @@ describe('fanOutWebhooks', () => {
 
     fetchMock.mockResolvedValue(new Response('ok', { status: 200 }))
 
-    const env = { WEBHOOK_URLS: 'https://a.test,https://b.test' } as Env
-    const resultsPromise = fanOutWebhooks(env, { code: 'abc', ts: Date.now() })
+    process.env.WEBHOOK_URLS = 'https://a.test,https://b.test'
+    const resultsPromise = fanOutWebhooks('abc')
 
     // flush timers for abort controller safety
     await vi.runAllTimersAsync()

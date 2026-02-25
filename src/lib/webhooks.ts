@@ -8,22 +8,27 @@ type WebhookResult = {
 const WEBHOOK_TIMEOUT_MS = 5000
 const RETRIES = 2
 
-export function getWebhookTargets(env: Env): string[] {
-  const raw = (env.WEBHOOK_URLS || env.WEBHOOK_URL || '').toString()
+export function getWebhookTargets(): string[] {
+  const raw = (process.env.WEBHOOK_URLS ?? '').toString()
   return raw
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
 }
 
-async function postOnce(url: string, payload: unknown): Promise<Response> {
+const normalizePayload = (payload: string): { content: string } => ({
+  content: payload,
+})
+
+async function postOnce(url: string, payload: string): Promise<Response> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT_MS)
   try {
+    const body = normalizePayload(payload)
     return await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
       signal: controller.signal,
     })
   } finally {
@@ -32,35 +37,30 @@ async function postOnce(url: string, payload: unknown): Promise<Response> {
 }
 
 export async function fanOutWebhooks(
-  env: Env,
-  payload: unknown,
+  payload: string,
 ): Promise<WebhookResult[]> {
-  const targets = getWebhookTargets(env)
+  const targets = getWebhookTargets()
   if (!targets.length) return []
 
+  console.log(`[webhook] sending payload to ${targets.length} targets`)
   const attempts = async (url: string): Promise<WebhookResult> => {
     let lastError: string | undefined
     for (let i = 0; i <= RETRIES; i++) {
       try {
         const res = await postOnce(url, payload)
-        if (res.ok) {
+        console.log(res)
+        if (res.status >= 200 && res.status < 300) {
           return { url, ok: true, status: res.status }
         }
-        lastError = `status ${res.status}`
+        lastError = `${res.status}: ${await res.text()}`
       } catch (err) {
         lastError = err instanceof Error ? err.message : 'unknown error'
       }
+      console.error('[webhook] failed', url, lastError)
     }
     return { url, ok: false, status: 0, error: lastError }
   }
 
   const results = await Promise.all(targets.map((url) => attempts(url)))
   return results
-}
-
-declare global {
-  interface Env {
-    WEBHOOK_URLS?: string
-    WEBHOOK_URL?: string
-  }
 }

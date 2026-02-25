@@ -11,54 +11,53 @@ export type StoredCode = {
   ts: number
 }
 
-const CODE_PREFIX = 'code:'
-const LATEST_KEY = 'latest'
+const store = new Map<string, StoredCode>()
+let latest: StoredCode | null = null
 export const TTL_SECONDS = 60
 
+const CODE_PREFIX = 'code:'
 const buildKey = (code: string) => `${CODE_PREFIX}${encodeURIComponent(code)}`
 
-export async function saveCode(env: Env, code: string) {
+const pruneExpired = () => {
+  const now = Date.now()
+  for (const [key, value] of store.entries()) {
+    if (now - value.ts > TTL_SECONDS * 1000) {
+      store.delete(key)
+    }
+  }
+  if (latest && now - latest.ts > TTL_SECONDS * 1000) {
+    latest = null
+  }
+}
+
+export async function saveCode(code: string) {
+  pruneExpired()
   const key = buildKey(code)
-  const existing = await env.CODES.get<StoredCode>(key, { type: 'json' })
+  const existing = store.get(key)
   if (existing) {
     return { stored: false, reason: 'duplicate' as const }
   }
 
   const ts = Date.now()
   const record: StoredCode = { code, ts }
-
-  await Promise.all([
-    env.CODES.put(key, JSON.stringify(record), { expirationTtl: TTL_SECONDS }),
-    env.CODES.put(LATEST_KEY, JSON.stringify(record), {
-      expirationTtl: TTL_SECONDS,
-    }),
-  ])
+  store.set(key, record)
+  latest = record
 
   return { stored: true, record }
 }
 
-export async function listCodes(env: Env): Promise<StoredCode[]> {
-  const list = await env.CODES.list({ prefix: CODE_PREFIX })
-  if (!list.keys.length) return []
-  const values = await Promise.all(
-    list.keys.map(async (item: KVNamespaceListKey<unknown, string>) => {
-      const val = await env.CODES.get<StoredCode>(item.name, { type: 'json' })
-      return val ?? null
-    }),
-  )
-
-  return values
-    .filter((v): v is StoredCode => Boolean(v))
-    .sort((a: StoredCode, b: StoredCode) => b.ts - a.ts)
+export async function listCodes(): Promise<StoredCode[]> {
+  pruneExpired()
+  return Array.from(store.values()).sort((a, b) => b.ts - a.ts)
 }
 
-export async function getLatest(env: Env): Promise<StoredCode | null> {
-  const latest = await env.CODES.get<StoredCode>(LATEST_KEY, { type: 'json' })
-  return latest ?? null
+export async function getLatest(): Promise<StoredCode | null> {
+  pruneExpired()
+  return latest
 }
 
-declare global {
-  interface Env {
-    CODES: KVNamespace
-  }
+// Test helper to reset in-memory store
+export function __resetKV() {
+  store.clear()
+  latest = null
 }

@@ -9,64 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as EnrollRouteImport } from './routes/enroll'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as EnrollTestRouteImport } from './routes/enroll/test'
+import { Route as EnrollIndexRouteImport } from './routes/enroll/index'
 
-const EnrollRoute = EnrollRouteImport.update({
-  id: '/enroll',
-  path: '/enroll',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EnrollTestRoute = EnrollTestRouteImport.update({
-  id: '/test',
-  path: '/test',
-  getParentRoute: () => EnrollRoute,
+const EnrollIndexRoute = EnrollIndexRouteImport.update({
+  id: '/enroll/',
+  path: '/enroll/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/enroll': typeof EnrollRouteWithChildren
-  '/enroll/test': typeof EnrollTestRoute
+  '/enroll/': typeof EnrollIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/enroll': typeof EnrollRouteWithChildren
-  '/enroll/test': typeof EnrollTestRoute
+  '/enroll': typeof EnrollIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/enroll': typeof EnrollRouteWithChildren
-  '/enroll/test': typeof EnrollTestRoute
+  '/enroll/': typeof EnrollIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/enroll' | '/enroll/test'
+  fullPaths: '/' | '/enroll/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/enroll' | '/enroll/test'
-  id: '__root__' | '/' | '/enroll' | '/enroll/test'
+  to: '/' | '/enroll'
+  id: '__root__' | '/' | '/enroll/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  EnrollRoute: typeof EnrollRouteWithChildren
+  EnrollIndexRoute: typeof EnrollIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/enroll': {
-      id: '/enroll'
-      path: '/enroll'
-      fullPath: '/enroll'
-      preLoaderRoute: typeof EnrollRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -74,30 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/enroll/test': {
-      id: '/enroll/test'
-      path: '/test'
-      fullPath: '/enroll/test'
-      preLoaderRoute: typeof EnrollTestRouteImport
-      parentRoute: typeof EnrollRoute
+    '/enroll/': {
+      id: '/enroll/'
+      path: '/enroll'
+      fullPath: '/enroll/'
+      preLoaderRoute: typeof EnrollIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface EnrollRouteChildren {
-  EnrollTestRoute: typeof EnrollTestRoute
-}
-
-const EnrollRouteChildren: EnrollRouteChildren = {
-  EnrollTestRoute: EnrollTestRoute,
-}
-
-const EnrollRouteWithChildren =
-  EnrollRoute._addFileChildren(EnrollRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  EnrollRoute: EnrollRouteWithChildren,
+  EnrollIndexRoute: EnrollIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

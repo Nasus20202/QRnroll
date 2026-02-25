@@ -10,6 +10,6 @@ const fetchCodesClient = async (): Promise<CodesResponse> => {
   return payload as CodesResponse
 }
 
-export const Route = createFileRoute('/enroll')({
+export const Route = createFileRoute('/enroll/')({
   component: () => <EnrollPage fetchCodes={fetchCodesClient} />,
 })

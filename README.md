@@ -1,6 +1,6 @@
 ## QRnroll
 
-Mobile-first QR scanner built with TanStack Start and Cloudflare Workers. It saves scanned codes to KV with a short TTL, lists live codes, and auto-opens the latest codes on the `/enroll` page.
+Mobile-first QR scanner built with TanStack Start. It uses an in-memory store with a short TTL, lists live codes, and auto-opens the latest codes on the `/enroll` page. Optional webhooks can fan out scans (e.g., to Discord) via `WEBHOOK_URLS`.
 
 ### Run locally
 
@@ -21,19 +21,25 @@ pnpm build
 pnpm test
 ```
 
-### Deploy (Cloudflare Workers)
+### Docker
+
+Build and run with Docker/Compose (exposes on 8080):
 
 ```bash
-pnpm run build && pnpm wrangler deploy
+docker compose up --build
 ```
+
+### Environment
+
+- `WEBHOOK_URLS` (optional): comma-separated webhook endpoints for scan notifications.
+  - Example: `WEBHOOK_URLS=https://discord.com/api/webhooks/...`
 
 ### Key routes
 
 - `/` – scanner + live list
 - `/enroll` – polls valid codes and opens them in new tabs
-- `/enroll/test` – pop-up permission check
 
 ### Notes
 
-- Requires KV binding `CODES` (see `wrangler.jsonc`).
+- Storage is in-memory; data resets on restart.
 - Pop-up blockers can stop `/enroll` from opening codes; allow pop-ups for this site.
