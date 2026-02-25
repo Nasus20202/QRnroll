@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: dark;
+  --bg: 15 18 26;
+  --card: 26 30 45;
+  --accent: 74 222 128;
+  --muted: 148 163 184;
+}
+
+body {
+  @apply m-0 min-h-screen bg-slate-900 text-slate-100 antialiased;
+  font-family:
+    'Inter var',
+    'Satoshi',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(74, 222, 128, 0.08),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(56, 189, 248, 0.12),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 50% 80%,
+      rgba(94, 234, 212, 0.12),
+      transparent 25%
+    ),
+    rgb(var(--bg));
+}
+
+a {
+  @apply text-emerald-300 hover:text-emerald-200 transition-colors;
+}
+
+::selection {
+  background: rgba(74, 222, 128, 0.3);
+}

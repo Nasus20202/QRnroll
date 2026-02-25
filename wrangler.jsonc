@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qrnroll",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "kv_namespaces": [
+    {
+      "binding": "CODES",
+      "id": "92d29acf6f2b465fbc305239ed860a65",
+      "preview_id": "4e259460121249c7a00a7383ba4a1f01",
+    },
+  ],
+}
