@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+// BrowserMultiFormatReader is used for the instance (decodeFromVideoDevice) only;
+// device enumeration uses navigator.mediaDevices.enumerateDevices() directly.
 import { CameraPanel } from '@/components/CameraPanel'
 import { CodesList } from '@/components/CodesList'
 
@@ -100,8 +102,21 @@ export default function ScannerPage({
   useEffect(() => {
     const init = async () => {
       try {
-        const devices = await BrowserMultiFormatReader.listVideoInputDevices()
-        const deviceId = devices[0]?.deviceId ?? 'default-camera'
+        // Request permission first so that enumerateDevices returns real device IDs.
+        // Without this, browsers return empty-string deviceIds until permission is granted,
+        // causing OverconstrainedError when a blank/fake ID is passed as an exact constraint.
+        await navigator.mediaDevices.getUserMedia({ video: true })
+
+        const allDevices = await navigator.mediaDevices.enumerateDevices()
+        const devices = allDevices.filter((d) => d.kind === 'videoinput')
+
+        if (devices.length === 0) {
+          setTimedStatus({ kind: 'error', message: 'No camera found' }, 0)
+          return
+        }
+
+        // Use || instead of ?? to also catch empty-string deviceIds
+        const deviceId = devices[0].deviceId || undefined
 
         if (!videoRef.current) {
           videoRef.current = document.createElement('video')
@@ -121,10 +136,11 @@ export default function ScannerPage({
         )
       } catch (err) {
         console.error('Camera init error:', err)
-        setTimedStatus(
-          { kind: 'error', message: 'Camera unavailable — check permissions' },
-          0, // don't auto-clear camera errors
-        )
+        const message =
+          err instanceof DOMException && err.name === 'NotAllowedError'
+            ? 'Camera permission denied'
+            : 'Camera unavailable — check permissions'
+        setTimedStatus({ kind: 'error', message }, 0)
       }
     }
 
