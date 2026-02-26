@@ -40,6 +40,8 @@ export default function ScannerPage({
   const [scanned, setScanned] = useState<string | null>(null)
   const [codes, setCodes] = useState<CodeItem[]>([])
   const [status, setStatus] = useState<Status>(IDLE_STATUS)
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
+  const [currentDeviceIndex, setCurrentDeviceIndex] = useState(0)
 
   const reader = useMemo(() => new BrowserMultiFormatReader(), [])
 
@@ -99,6 +101,46 @@ export default function ScannerPage({
     [submitCode, refreshCodes, setTimedStatus],
   )
 
+  const startDecoding = useCallback(
+    async (deviceId?: string) => {
+      if (!videoRef.current) {
+        videoRef.current = document.createElement('video')
+      }
+
+      const resetFn = (reader as unknown as { reset?: () => void }).reset
+      if (typeof resetFn === 'function') resetFn.call(reader)
+
+      await reader.decodeFromVideoDevice(
+        deviceId,
+        videoRef.current,
+        (result, err) => {
+          if (result) {
+            handleScan(result.getText())
+          }
+          if (err && !err.name.startsWith('NotFoundException')) {
+            console.error('Decode error:', err)
+          }
+        },
+      )
+    },
+    [handleScan, reader],
+  )
+
+  const switchCamera = useCallback(async () => {
+    if (!devices.length) return
+
+    const nextIndex = (currentDeviceIndex + 1) % devices.length
+    setCurrentDeviceIndex(nextIndex)
+
+    try {
+      await startDecoding(devices[nextIndex].deviceId || undefined)
+      setTimedStatus({ kind: 'info', message: 'Switched camera' })
+    } catch (err) {
+      console.error('Camera switch error:', err)
+      setTimedStatus({ kind: 'error', message: 'Unable to switch camera' }, 0)
+    }
+  }, [currentDeviceIndex, devices, setTimedStatus, startDecoding])
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -108,32 +150,20 @@ export default function ScannerPage({
         await navigator.mediaDevices.getUserMedia({ video: true })
 
         const allDevices = await navigator.mediaDevices.enumerateDevices()
-        const devices = allDevices.filter((d) => d.kind === 'videoinput')
+        const videoDevices = allDevices.filter((d) => d.kind === 'videoinput')
 
-        if (devices.length === 0) {
+        if (videoDevices.length === 0) {
           setTimedStatus({ kind: 'error', message: 'No camera found' }, 0)
           return
         }
 
+        setDevices(videoDevices)
+        setCurrentDeviceIndex(0)
+
         // Use || instead of ?? to also catch empty-string deviceIds
-        const deviceId = devices[0].deviceId || undefined
+        const deviceId = videoDevices[0].deviceId || undefined
 
-        if (!videoRef.current) {
-          videoRef.current = document.createElement('video')
-        }
-
-        await reader.decodeFromVideoDevice(
-          deviceId,
-          videoRef.current,
-          (result, err) => {
-            if (result) {
-              handleScan(result.getText())
-            }
-            if (err && !err.name.startsWith('NotFoundException')) {
-              console.error('Decode error:', err)
-            }
-          },
-        )
+        await startDecoding(deviceId)
       } catch (err) {
         console.error('Camera init error:', err)
         const message =
@@ -194,6 +224,7 @@ export default function ScannerPage({
       <CameraPanel
         videoRef={videoRef}
         onZoom={handleZoom}
+        onSwitchCamera={devices.length > 1 ? switchCamera : undefined}
         scanned={scanned}
         status={status}
       />

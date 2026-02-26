@@ -13,6 +13,7 @@ import type { Status } from '@/pages/ScannerPage'
 export type CameraPanelProps = {
   videoRef: RefObject<HTMLVideoElement | null>
   onZoom: (delta: number) => void
+  onSwitchCamera?: () => void
   scanned: string | null
   status: Status
 }
@@ -43,6 +44,7 @@ const StatusIcon = ({ kind }: { kind: Status['kind'] }) => {
 export function CameraPanel({
   videoRef,
   onZoom,
+  onSwitchCamera,
   scanned,
   status,
 }: CameraPanelProps) {
@@ -56,9 +58,7 @@ export function CameraPanel({
           <h1 className="text-2xl font-semibold text-white">
             Scan attendance code
           </h1>
-          <p className="text-sm text-slate-300">
-            Aim at the room's QR. Zoom if it's far.
-          </p>
+          <p className="text-sm text-slate-300">Aim at the room's QR code.</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -79,6 +79,17 @@ export function CameraPanel({
             <ZoomOut size={16} />
             <span className="sr-only">Zoom out</span>
           </button>
+          {onSwitchCamera && (
+            <button
+              type="button"
+              onClick={onSwitchCamera}
+              aria-label="Switch camera"
+              className="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600"
+            >
+              <span className="text-sm text-white">Switch</span>
+              <span className="sr-only">Switch camera</span>
+            </button>
+          )}
         </div>
       </header>
 

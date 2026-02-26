@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import type { Mock } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import ScannerPage from '../ScannerPage'
 import type { CodeItem, ScannerPageProps } from '../ScannerPage'
@@ -6,15 +7,17 @@ import type { CodeItem, ScannerPageProps } from '../ScannerPage'
 let decodeCallback:
   | ((result: { getText: () => string }, err: unknown) => void)
   | null = null
+const decodeCalls: Array<string | undefined> = []
 
 vi.mock('@zxing/browser', () => {
   class MockReader {
     decodeFromVideoDevice = vi.fn(
       (
-        _id: string,
+        id: string | undefined,
         _video: unknown,
         cb: (result: { getText: () => string } | null, err: unknown) => void,
       ) => {
+        decodeCalls.push(id)
         decodeCallback = cb
         return Promise.resolve(undefined)
       },
@@ -33,6 +36,7 @@ describe('ScannerPage', () => {
 
   beforeEach(() => {
     decodeCallback = null
+    decodeCalls.length = 0
 
     Object.defineProperty(navigator, 'mediaDevices', {
       writable: true,
@@ -94,5 +98,22 @@ describe('ScannerPage', () => {
       'noopener,noreferrer',
     )
     openSpy.mockRestore()
+  })
+
+  it('switches cameras when multiple devices exist', async () => {
+    ;(navigator.mediaDevices.enumerateDevices as Mock).mockResolvedValueOnce([
+      { deviceId: 'dev-1', kind: 'videoinput', label: 'Cam 1' },
+      { deviceId: 'dev-2', kind: 'videoinput', label: 'Cam 2' },
+    ])
+
+    render(<ScannerPage submitCode={submitCode} fetchCodes={fetchCodes} />)
+
+    await waitFor(() => expect(decodeCalls.length).toBe(1))
+    expect(decodeCalls[0]).toBe('dev-1')
+
+    fireEvent.click(screen.getByRole('button', { name: /switch camera/i }))
+
+    await waitFor(() => expect(decodeCalls.length).toBe(2))
+    expect(decodeCalls[1]).toBe('dev-2')
   })
 })
