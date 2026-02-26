@@ -42,7 +42,10 @@ describe('ScannerPage', () => {
       writable: true,
       configurable: true,
       value: {
-        getUserMedia: vi.fn().mockResolvedValue({}),
+        getUserMedia: vi.fn().mockResolvedValue({
+          getVideoTracks: () => [{ getSettings: () => ({ deviceId: 'dev' }) }],
+          getTracks: () => [{ stop: vi.fn() }],
+        }),
         enumerateDevices: vi
           .fn()
           .mockResolvedValue([

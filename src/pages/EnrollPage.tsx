@@ -64,7 +64,7 @@ export default function EnrollPage({ fetchCodes }: EnrollPageProps) {
   const { codes, status, lastOpened } = useLiveCodes(fetchCodes)
 
   useEffect(() => {
-    const newWindow = window.open('Please allow popups for this site', '_blank')
+    const newWindow = window.open('', '_blank')
     if (newWindow) {
       newWindow.close()
     }

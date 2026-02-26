@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
-// BrowserMultiFormatReader is used for the instance (decodeFromVideoDevice) only;
-// device enumeration uses navigator.mediaDevices.enumerateDevices() directly.
 import { CameraPanel } from '@/components/CameraPanel'
 import { CodesList } from '@/components/CodesList'
 
@@ -42,6 +40,7 @@ export default function ScannerPage({
   const [status, setStatus] = useState<Status>(IDLE_STATUS)
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
   const [currentDeviceIndex, setCurrentDeviceIndex] = useState(0)
+  const currentDeviceIndexRef = useRef(0)
 
   const reader = useMemo(() => new BrowserMultiFormatReader(), [])
 
@@ -107,6 +106,25 @@ export default function ScannerPage({
         videoRef.current = document.createElement('video')
       }
 
+      // Stop all existing tracks first so the camera hardware is fully released
+      // before we ask for a new stream. Without this, Android throws
+      // "could not start video source" when switching cameras.
+      const existing = videoRef.current.srcObject
+      const hadStream =
+        existing != null &&
+        typeof (existing as MediaStream).getTracks === 'function'
+      if (hadStream) {
+        ;(existing as MediaStream).getTracks().forEach((t) => t.stop())
+      }
+      videoRef.current.srcObject = null
+
+      // Android needs a brief moment after tracks are stopped before the
+      // hardware is actually available for a new stream. Only wait when we
+      // actually stopped an existing stream.
+      if (hadStream) {
+        await new Promise((resolve) => setTimeout(resolve, 300))
+      }
+
       const resetFn = (reader as unknown as { reset?: () => void }).reset
       if (typeof resetFn === 'function') resetFn.call(reader)
 
@@ -129,7 +147,8 @@ export default function ScannerPage({
   const switchCamera = useCallback(async () => {
     if (!devices.length) return
 
-    const nextIndex = (currentDeviceIndex + 1) % devices.length
+    const nextIndex = (currentDeviceIndexRef.current + 1) % devices.length
+    currentDeviceIndexRef.current = nextIndex
     setCurrentDeviceIndex(nextIndex)
 
     try {
@@ -139,15 +158,20 @@ export default function ScannerPage({
       console.error('Camera switch error:', err)
       setTimedStatus({ kind: 'error', message: 'Unable to switch camera' }, 0)
     }
-  }, [currentDeviceIndex, devices, setTimedStatus, startDecoding])
+  }, [devices, setTimedStatus, startDecoding])
 
   useEffect(() => {
     const init = async () => {
       try {
-        // Request permission first so that enumerateDevices returns real device IDs.
-        // Without this, browsers return empty-string deviceIds until permission is granted,
-        // causing OverconstrainedError when a blank/fake ID is passed as an exact constraint.
-        await navigator.mediaDevices.getUserMedia({ video: true })
+        // Request permission preferring the rear camera, and capture which
+        // deviceId the browser picked so we can start on the right one.
+        const permStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+        })
+        const envDeviceId =
+          permStream.getVideoTracks()[0]?.getSettings().deviceId ?? ''
+        // Release immediately; startDecoding will open its own stream.
+        permStream.getTracks().forEach((t) => t.stop())
 
         const allDevices = await navigator.mediaDevices.enumerateDevices()
         const videoDevices = allDevices.filter((d) => d.kind === 'videoinput')
@@ -158,10 +182,23 @@ export default function ScannerPage({
         }
 
         setDevices(videoDevices)
-        setCurrentDeviceIndex(0)
+
+        // Pick the device the browser chose for 'environment', fall back to
+        // a label search, then to index 0.
+        let startIndex = envDeviceId
+          ? videoDevices.findIndex((d) => d.deviceId === envDeviceId)
+          : -1
+        if (startIndex < 0)
+          startIndex = videoDevices.findIndex((d) =>
+            /back|rear|environment/i.test(d.label),
+          )
+        if (startIndex < 0) startIndex = 0
+
+        currentDeviceIndexRef.current = startIndex
+        setCurrentDeviceIndex(startIndex)
 
         // Use || instead of ?? to also catch empty-string deviceIds
-        const deviceId = videoDevices[0].deviceId || undefined
+        const deviceId = videoDevices[startIndex].deviceId || undefined
 
         await startDecoding(deviceId)
       } catch (err) {
@@ -189,19 +226,6 @@ export default function ScannerPage({
     return () => clearInterval(id)
   }, [refreshCodes])
 
-  const [zoom, setZoom] = useState<number>(1)
-
-  const handleZoom = useCallback(
-    (delta: number) => {
-      const next = Math.min(3, Math.max(1, zoom + delta))
-      setZoom(next)
-      if (videoRef.current) {
-        videoRef.current.style.transform = `scale(${next})`
-      }
-    },
-    [zoom],
-  )
-
   const copyCode = useCallback(
     async (code: string) => {
       try {
@@ -223,7 +247,6 @@ export default function ScannerPage({
     <div className="max-w-5xl mx-auto grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
       <CameraPanel
         videoRef={videoRef}
-        onZoom={handleZoom}
         onSwitchCamera={devices.length > 1 ? switchCamera : undefined}
         scanned={scanned}
         status={status}
