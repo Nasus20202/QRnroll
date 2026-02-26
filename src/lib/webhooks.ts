@@ -48,7 +48,6 @@ export async function fanOutWebhooks(
     for (let i = 0; i <= RETRIES; i++) {
       try {
         const res = await postOnce(url, payload)
-        console.log(res)
         if (res.status >= 200 && res.status < 300) {
           return { url, ok: true, status: res.status }
         }
