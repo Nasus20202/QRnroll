@@ -10,6 +10,7 @@ export type CodesListProps = {
   onCopy: (code: string) => Promise<void>
   onRefresh: () => void
   onOpen: (code: string) => void
+  showAutoEnrollCta?: boolean
 }
 
 export function CodesList({
@@ -17,6 +18,7 @@ export function CodesList({
   onCopy,
   onRefresh,
   onOpen,
+  showAutoEnrollCta = true,
 }: CodesListProps) {
   const [now, setNow] = useState<number | null>(null)
 
@@ -80,12 +82,14 @@ export function CodesList({
         ))}
       </div>
 
-      <a
-        className="mt-4 inline-flex items-center gap-2 text-emerald-300 hover:text-emerald-200 text-sm"
-        href="/enroll"
-      >
-        Click here to enroll automatically
-      </a>
+      {showAutoEnrollCta && (
+        <a
+          className="mt-5 block w-full text-center text-base font-semibold tracking-wide rounded-xl border border-emerald-400/60 bg-emerald-500/10 text-emerald-200 px-4 py-3 hover:bg-emerald-500/20"
+          href="/enroll"
+        >
+          Click here to enroll automatically
+        </a>
+      )}
     </aside>
   )
 }

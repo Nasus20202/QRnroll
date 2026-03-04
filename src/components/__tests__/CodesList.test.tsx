@@ -20,7 +20,7 @@ describe('CodesList', () => {
     expect(screen.getByText('No active codes yet.')).toBeTruthy()
   })
 
-  it('renders codes and calls handlers', async () => {
+  it('renders codes, CTA, and calls handlers', async () => {
     const codes: CodeItem[] = [
       { code: 'foo', ts: Date.now() - 1000 },
       { code: 'bar', ts: Date.now() - 2000 },
@@ -47,5 +47,21 @@ describe('CodesList', () => {
     const copyButtons = screen.getAllByLabelText('Copy code')
     fireEvent.click(copyButtons[0])
     expect(onCopy).toHaveBeenCalledWith('foo')
+
+    expect(screen.getByText('Click here to enroll automatically')).toBeTruthy()
+  })
+
+  it('can hide the auto-enroll CTA', () => {
+    render(
+      <CodesList
+        codes={[]}
+        onCopy={vi.fn()}
+        onRefresh={vi.fn()}
+        onOpen={vi.fn()}
+        showAutoEnrollCta={false}
+      />,
+    )
+
+    expect(screen.queryByText('Click here to enroll automatically')).toBeNull()
   })
 })

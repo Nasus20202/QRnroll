@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 
 import appCss from '../styles.css?url'
+import { TrackingScript } from '@/components/TrackingScript'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -18,7 +19,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'QRnroll — Scan & enroll fast',
+        title: 'QRnroll - Scan & enroll fast',
       },
     ],
     links: [
@@ -40,6 +41,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body suppressHydrationWarning>
         <div className="px-4 pb-10 pt-6">{children}</div>
+        <TrackingScript />
         <Scripts />
       </body>
     </html>

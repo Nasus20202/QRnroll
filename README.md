@@ -33,6 +33,8 @@ docker compose up --build
 
 - `WEBHOOK_URLS` (optional): comma-separated webhook endpoints for scan notifications.
   - Example: `WEBHOOK_URLS=https://discord.com/api/webhooks/...`
+- `TRACKING_SCRIPT` (optional): raw `<script>` snippet injected into the app shell.
+  - Example: `TRACKING_SCRIPT='<script src="https://app.rybbit.io/api/script.js" data-site-id="abc" defer></script>'`
 
 ### Key routes
 
@@ -43,3 +45,4 @@ docker compose up --build
 
 - Storage is in-memory; data resets on restart.
 - Pop-up blockers can stop `/enroll` from opening codes; allow pop-ups for this site.
+- `/enroll` can display browser notifications (with the app icon) once users grant permission.

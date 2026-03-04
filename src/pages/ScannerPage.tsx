@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { CameraPanel } from '@/components/CameraPanel'
 import { CodesList } from '@/components/CodesList'
+import { PageHero } from '@/components/PageHero'
 
 export type SubmitResult = {
   ok: boolean
@@ -39,7 +40,6 @@ export default function ScannerPage({
   const [codes, setCodes] = useState<CodeItem[]>([])
   const [status, setStatus] = useState<Status>(IDLE_STATUS)
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
-  const [currentDeviceIndex, setCurrentDeviceIndex] = useState(0)
   const currentDeviceIndexRef = useRef(0)
 
   const reader = useMemo(() => new BrowserMultiFormatReader(), [])
@@ -149,7 +149,6 @@ export default function ScannerPage({
 
     const nextIndex = (currentDeviceIndexRef.current + 1) % devices.length
     currentDeviceIndexRef.current = nextIndex
-    setCurrentDeviceIndex(nextIndex)
 
     try {
       await startDecoding(devices[nextIndex].deviceId || undefined)
@@ -195,7 +194,6 @@ export default function ScannerPage({
         if (startIndex < 0) startIndex = 0
 
         currentDeviceIndexRef.current = startIndex
-        setCurrentDeviceIndex(startIndex)
 
         // Use || instead of ?? to also catch empty-string deviceIds
         const deviceId = videoDevices[startIndex].deviceId || undefined
@@ -245,12 +243,27 @@ export default function ScannerPage({
 
   return (
     <div className="max-w-5xl mx-auto grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
-      <CameraPanel
-        videoRef={videoRef}
-        onSwitchCamera={devices.length > 1 ? switchCamera : undefined}
-        scanned={scanned}
-        status={status}
-      />
+      <PageHero
+        eyebrow={{ label: 'QRnroll', href: '/' }}
+        title="Scan attendance code"
+        description={
+          <p>Aim at the room's QR code to submit attendance instantly.</p>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-xs text-slate-400">
+            {devices.length
+              ? `${devices.length} camera${devices.length > 1 ? 's' : ''} detected`
+              : 'Waiting for camera permission…'}
+          </p>
+          <CameraPanel
+            videoRef={videoRef}
+            onSwitchCamera={devices.length > 1 ? switchCamera : undefined}
+            scanned={scanned}
+            status={status}
+          />
+        </div>
+      </PageHero>
       <CodesList
         codes={codes}
         onCopy={copyCode}

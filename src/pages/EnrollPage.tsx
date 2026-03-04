@@ -1,13 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { CodesList } from '@/components/CodesList'
+import { LiveStatus } from '@/components/LiveStatus'
+import { NotificationOptInCard } from '@/components/NotificationOptInCard'
+import { PageHero } from '@/components/PageHero'
 import type { CodesResponse } from '@/server/codes'
 
 export type EnrollPageProps = {
   fetchCodes: () => Promise<CodesResponse>
 }
 
-function useLiveCodes(fetchCodes: () => Promise<CodesResponse>) {
+function useLiveCodes(
+  fetchCodes: () => Promise<CodesResponse>,
+  onNewCodes?: (items: CodesResponse) => void,
+) {
   const [codes, setCodes] = useState<CodesResponse>([])
   const [status, setStatus] = useState<string>('Waiting for valid codes…')
   const [lastOpened, setLastOpened] = useState<string | null>(null)
@@ -30,6 +36,7 @@ function useLiveCodes(fetchCodes: () => Promise<CodesResponse>) {
           return
         }
         let openedAny = false
+        const newlyOpened: CodesResponse = []
         for (const item of list) {
           if (!openedRef.current.has(item.code)) {
             openedRef.current.add(item.code)
@@ -37,7 +44,11 @@ function useLiveCodes(fetchCodes: () => Promise<CodesResponse>) {
             setStatus(`Opening ${item.code}…`)
             window.open(item.code, '_blank', 'noopener,noreferrer')
             openedAny = true
+            newlyOpened.push(item)
           }
+        }
+        if (newlyOpened.length && onNewCodes) {
+          onNewCodes(newlyOpened)
         }
         if (!openedAny) {
           setStatus('No new codes to open yet')
@@ -55,13 +66,65 @@ function useLiveCodes(fetchCodes: () => Promise<CodesResponse>) {
       mounted = false
       clearInterval(id)
     }
-  }, [fetchCodes])
+  }, [fetchCodes, onNewCodes])
 
   return { codes, status, lastOpened }
 }
 
 export default function EnrollPage({ fetchCodes }: EnrollPageProps) {
-  const { codes, status, lastOpened } = useLiveCodes(fetchCodes)
+  const [supportsNotifications, setSupportsNotifications] = useState(false)
+  const [notificationPermission, setNotificationPermission] =
+    useState<NotificationPermission>('default')
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      setSupportsNotifications(false)
+      return
+    }
+    setSupportsNotifications(true)
+    setNotificationPermission(Notification.permission)
+  }, [])
+
+  const notifyNewCodes = useCallback(
+    (items: CodesResponse) => {
+      if (!supportsNotifications || notificationPermission !== 'granted') {
+        return
+      }
+      for (const item of items) {
+        try {
+          new Notification('New code available', {
+            body: item.code,
+            tag: item.code,
+            icon: '/favicon.ico',
+          })
+        } catch (err) {
+          console.error('Notification error:', err)
+        }
+      }
+    },
+    [notificationPermission, supportsNotifications],
+  )
+
+  const requestNotifications = useCallback(async () => {
+    if (!supportsNotifications || notificationPermission === 'granted') {
+      return
+    }
+    try {
+      const result = await Notification.requestPermission()
+      setNotificationPermission(result)
+    } catch (err) {
+      console.error('Notification permission error:', err)
+    }
+  }, [notificationPermission, supportsNotifications])
+
+  const { codes, status, lastOpened } = useLiveCodes(fetchCodes, notifyNewCodes)
+
+  useEffect(() => {
+    if (!supportsNotifications || notificationPermission !== 'default') {
+      return
+    }
+    void requestNotifications()
+  }, [notificationPermission, requestNotifications, supportsNotifications])
 
   useEffect(() => {
     const newWindow = window.open('', '_blank')
@@ -84,18 +147,25 @@ export default function EnrollPage({ fetchCodes }: EnrollPageProps) {
 
   return (
     <div className="max-w-5xl mx-auto grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
-      <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-xl text-left space-y-3">
-        <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">
-          QRnroll
-        </p>
-        <h1 className="text-2xl font-semibold text-white">Enroll redirect</h1>
-        <p className="text-slate-300 text-sm">
-          This page watches for valid codes and opens each one in a new tab as
-          soon as it appears. Keep this tab open. Please allow popups for this
-          site, and make sure your browser is not blocking them.
-        </p>
+      <PageHero
+        eyebrow={{ label: 'QRnroll', href: '/' }}
+        title="Enroll redirect"
+        description={
+          <p>
+            This page watches for valid codes and opens each one in a new tab as
+            soon as it appears. Keep this tab open. Please allow popups for this
+            site, and make sure your browser is not blocking them.
+          </p>
+        }
+      >
         <LiveStatus status={status} lastOpened={lastOpened} />
-      </div>
+        {supportsNotifications && (
+          <NotificationOptInCard
+            permission={notificationPermission}
+            onRequest={requestNotifications}
+          />
+        )}
+      </PageHero>
 
       <div className="space-y-3">
         <CodesList
@@ -103,29 +173,9 @@ export default function EnrollPage({ fetchCodes }: EnrollPageProps) {
           onCopy={handleCopy}
           onRefresh={handleRefresh}
           onOpen={handleOpen}
+          showAutoEnrollCta={false}
         />
       </div>
-    </div>
-  )
-}
-
-function LiveStatus({
-  status,
-  lastOpened,
-}: {
-  status: string
-  lastOpened: string | null
-}) {
-  return (
-    <div className="rounded-xl border border-slate-700 bg-slate-900/80 p-4 text-slate-200 space-y-2">
-      <p className="text-sm">Status: {status}</p>
-      {lastOpened ? (
-        <p className="text-xs text-slate-400 break-all">
-          Last opened: {lastOpened}
-        </p>
-      ) : (
-        <p className="text-xs text-slate-500">No codes opened yet</p>
-      )}
     </div>
   )
 }
