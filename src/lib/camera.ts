@@ -7,7 +7,7 @@
  *   3. Index 0 (fallback).
  */
 export function pickRearDeviceIndex(
-  devices: MediaDeviceInfo[],
+  devices: Array<MediaDeviceInfo>,
   preferredDeviceId: string,
 ): number {
   let index = preferredDeviceId

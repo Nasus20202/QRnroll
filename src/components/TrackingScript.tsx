@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { getTrackingScript } from '@/server/tracking'
 import type { TrackingScriptPayload } from '@/server/tracking'
+import { getTrackingScript } from '@/server/tracking'
 
 export function TrackingScript() {
   const [script, setScript] = useState<string | null>(null)

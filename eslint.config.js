@@ -10,13 +10,25 @@ export default [
       '@typescript-eslint': tseslint,
     },
     rules: {
-      'import/no-cycle': 'off',
-      'import/order': 'off',
-      'sort-imports': 'off',
-      '@typescript-eslint/array-type': 'off',
-      '@typescript-eslint/require-await': 'off',
-      'pnpm/json-enforce-catalog': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/routeTree.gen.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['./*', '../*'],
+              message:
+                'Relative imports are not allowed. Please use @/ path alias instead.',
+            },
+          ],
+        },
+      ],
     },
   },
   {

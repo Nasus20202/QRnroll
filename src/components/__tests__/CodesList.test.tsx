@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 
-import { CodesList } from '@/components/CodesList'
 import type { CodeItem } from '@/pages/ScannerPage'
+import { CodesList } from '@/components/CodesList'
 
 describe('CodesList', () => {
   afterEach(() => cleanup())
@@ -20,8 +20,8 @@ describe('CodesList', () => {
     expect(screen.getByText('No active codes yet.')).toBeTruthy()
   })
 
-  it('renders codes, CTA, and calls handlers', async () => {
-    const codes: CodeItem[] = [
+  it('renders codes, CTA, and calls handlers', () => {
+    const codes: Array<CodeItem> = [
       { code: 'foo', ts: Date.now() - 1000 },
       { code: 'bar', ts: Date.now() - 2000 },
     ]

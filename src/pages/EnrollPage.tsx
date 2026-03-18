@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import type { CodesResponse } from '@/server/codes'
 import { CodesList } from '@/components/CodesList'
 import { LiveStatus } from '@/components/LiveStatus'
 import { NotificationOptInCard } from '@/components/NotificationOptInCard'
 import { PageHero } from '@/components/PageHero'
-import type { CodesResponse } from '@/server/codes'
 
 export type EnrollPageProps = {
   fetchCodes: () => Promise<CodesResponse>

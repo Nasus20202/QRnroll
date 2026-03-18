@@ -1,8 +1,8 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
-import EnrollPage from '@/pages/EnrollPage'
 import type { CodesResponse } from '@/server/codes'
+import EnrollPage from '@/pages/EnrollPage'
 
 describe('EnrollPage', () => {
   const fetchCodes = vi.fn<() => Promise<CodesResponse>>()

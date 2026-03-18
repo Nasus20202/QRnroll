@@ -1,22 +1,22 @@
 import {
+  afterEach,
+  beforeAll,
+  beforeEach,
   describe,
   expect,
   it,
   vi,
-  beforeEach,
-  beforeAll,
-  afterEach,
 } from 'vitest'
-import type { Mock } from 'vitest'
 import {
+  cleanup,
+  fireEvent,
   render,
   screen,
-  fireEvent,
   waitFor,
-  cleanup,
 } from '@testing-library/react'
-import ScannerPage from '@/pages/ScannerPage'
+import type { Mock } from 'vitest'
 import type { CodeItem, ScannerPageProps } from '@/pages/ScannerPage'
+import ScannerPage from '@/pages/ScannerPage'
 
 // jsdom's HTMLVideoElement.srcObject setter rejects plain objects.
 // Override it with a WeakMap-backed getter/setter so tests can simulate
@@ -39,7 +39,7 @@ let decodeCallback:
   | null = null
 
 // Tracks the deviceId passed to getUserMedia in each startDecoding call.
-const decodeCalls: string[] = []
+const decodeCalls: Array<string> = []
 
 vi.mock('@zxing/browser', () => {
   class MockReader {
@@ -141,7 +141,9 @@ describe('ScannerPage', () => {
   })
 
   it('copies and opens codes from list', async () => {
-    const codes: CodeItem[] = [{ code: 'https://example.com', ts: Date.now() }]
+    const codes: Array<CodeItem> = [
+      { code: 'https://example.com', ts: Date.now() },
+    ]
     fetchCodes.mockResolvedValueOnce(codes)
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.assign(navigator, { clipboard: { writeText } })
@@ -179,7 +181,7 @@ describe('ScannerPage', () => {
     expect(decodeCalls[1]).toBe('dev-2')
   })
 
-  it('always shows zoom controls (software zoom by default)', async () => {
+  it('always shows zoom controls (software zoom by default)', () => {
     render(<ScannerPage submitCode={submitCode} fetchCodes={fetchCodes} />)
 
     // Zoom controls are rendered immediately with the software-zoom defaults.

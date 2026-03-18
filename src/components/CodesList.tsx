@@ -6,7 +6,7 @@ import { differenceInSeconds } from 'date-fns'
 import type { CodeItem } from '@/pages/ScannerPage'
 
 export type CodesListProps = {
-  codes: CodeItem[]
+  codes: Array<CodeItem>
   onCopy: (code: string) => Promise<void>
   onRefresh: () => void
   onOpen: (code: string) => void

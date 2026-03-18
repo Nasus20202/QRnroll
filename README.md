@@ -31,6 +31,8 @@ docker compose up --build
 
 ### Environment
 
+- `VALKEY_URL` (optional): Connection string for a Valkey (or Redis) database to persist the scan queue across restarts. If omitted, the app falls back to a volatile in-memory store.
+  - Example: `VALKEY_URL=valkey://valkey:6379`
 - `WEBHOOK_URLS` (optional): comma-separated webhook endpoints for scan notifications.
   - Example: `WEBHOOK_URLS=https://discord.com/api/webhooks/...`
 - `TRACKING_SCRIPT` (optional): raw `<script>` snippet injected into the app shell.
@@ -43,6 +45,6 @@ docker compose up --build
 
 ### Notes
 
-- Storage is in-memory; data resets on restart.
+- By default, storage is in-memory; data resets on restart unless `VALKEY_URL` is provided. All codes have a 60-second TTL.
 - Pop-up blockers can stop `/enroll` from opening codes; allow pop-ups for this site.
 - `/enroll` can display browser notifications (with the app icon) once users grant permission.
