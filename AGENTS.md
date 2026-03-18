@@ -24,7 +24,7 @@ Key runtime characteristics:
 | Build | **Vite** (with `@tailwindcss/vite` and `@tanstack/router-plugin`) |
 | Language | TypeScript – strict mode, no `any` |
 | Styling | Tailwind CSS v4 + Radix UI primitives |
-| QR scanning | `@zxing/browser` – `BrowserMultiFormatReader.decodeFromVideoDevice` |
+| QR scanning | `@zxing/browser` – `BrowserMultiFormatReader.decodeFromStream` |
 | Testing | **Vitest** + `@testing-library/react` (jsdom environment) |
 | Linting | **ESLint** (via `@tanstack/eslint-config`) |
 | Formatting | **Prettier** (single quotes, no semicolons, trailing commas) |
@@ -122,19 +122,25 @@ The QR scanning pipeline:
 
 1. `getUserMedia` – request permission, prefer rear camera (`facingMode: environment`).
 2. `enumerateDevices` – list all video input devices.
-3. `BrowserMultiFormatReader.decodeFromVideoDevice(deviceId, videoElement, callback)` –
-   continuous decoding loop managed by ZXing.
-4. **Zoom** – after decoding starts, the active `MediaStreamTrack` exposes zoom via
-   `getCapabilities()` and accepts changes via `applyConstraints({ advanced: [{ zoom }] })`.
+3. Inspect `getCapabilities().zoom` on the active video track to choose a zoom path:
+   - **Hardware zoom** (`zoom` capability present): feed the raw `MediaStream` directly to
+     `BrowserMultiFormatReader.decodeFromStream`; zoom changes call
+     `track.applyConstraints({ advanced: [{ zoom }] })`.
+   - **Software zoom** (default, always available): an off-screen `<video>` receives the raw
+     stream; an `rAF` draw-loop crops each frame onto a `<canvas>` using the current zoom
+     factor (centre-crop + scale-up); `canvas.captureStream(30)` is passed to
+     `decodeFromStream` so ZXing genuinely reads the zoomed region, not just a CSS effect.
+4. The zoom slider (1–5× software range, or hardware range when available) is always visible.
+   A `"1.4×"` label next to the slider shows the active zoom factor.
 
-When adding new camera-related features, always handle the case where the capability is not
-supported (graceful no-op / hidden UI).
+When adding new camera-related features, always handle the case where a capability is not
+supported (graceful no-op).
 
 ---
 
 ## Keeping this file up to date
 
-`agents.md` is the primary reference for anyone (human or AI agent) working on this codebase.
+`AGENTS.md` is the primary reference for anyone (human or AI agent) working on this codebase.
 **Update it whenever you make a change that affects how the project is understood or worked on** –
 new tools, changed conventions, new architectural patterns, or significant feature additions.
 Do not let it drift out of sync with the code.
