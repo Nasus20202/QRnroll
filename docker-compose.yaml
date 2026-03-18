@@ -1,8 +1,17 @@
 services:
-  app:
+  qrnroll:
     build: .
     ports:
       - '8080:8080'
-    # environment:
-    #   - WEBHOOK_URLS=https://discord.com/api/webhooks/...
+    environment:
+      # - WEBHOOK_URLS=https://discord.com/api/webhooks/...
+      - VALKEY_URL=valkey://valkey:6379
+    restart: unless-stopped
+    depends_on:
+      - valkey
+
+  valkey:
+    image: valkey/valkey:9.0.3-alpine
+    ports:
+      - '6379:6379'
     restart: unless-stopped

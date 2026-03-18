@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+import type {
+  CodeItem,
+  Status,
+  StatusKind,
+  SubmitResult,
+  ZoomRange,
+} from '@/lib/scanner'
 import { CameraPanel } from '@/components/CameraPanel'
 import { CodesList } from '@/components/CodesList'
 import { PageHero } from '@/components/PageHero'
@@ -9,19 +16,12 @@ import {
   SCAN_COOLDOWN_MS,
   SOFTWARE_ZOOM_RANGE,
 } from '@/lib/scanner'
-import type {
-  CodeItem,
-  Status,
-  StatusKind,
-  SubmitResult,
-  ZoomRange,
-} from '@/lib/scanner'
 
 export type { CodeItem, Status, StatusKind, SubmitResult, ZoomRange }
 
 export type ScannerPageProps = {
   submitCode: (code: string) => Promise<SubmitResult>
-  fetchCodes: () => Promise<CodeItem[]>
+  fetchCodes: () => Promise<Array<CodeItem>>
 }
 
 export default function ScannerPage({
@@ -40,9 +40,9 @@ export default function ScannerPage({
   const zoomModeRef = useRef<'hardware' | 'software' | null>(null)
 
   const [scanned, setScanned] = useState<string | null>(null)
-  const [codes, setCodes] = useState<CodeItem[]>([])
+  const [codes, setCodes] = useState<Array<CodeItem>>([])
   const [status, setStatus] = useState<Status>(IDLE_STATUS)
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
+  const [devices, setDevices] = useState<Array<MediaDeviceInfo>>([])
   const currentDeviceIndexRef = useRef(0)
   const [zoom, setZoom] = useState(1)
   const [zoomRange, setZoomRange] = useState<ZoomRange>(SOFTWARE_ZOOM_RANGE)

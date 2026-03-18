@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 
 import { CameraPanel } from '@/components/CameraPanel'
 

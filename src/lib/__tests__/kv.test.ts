@@ -15,7 +15,9 @@ describe('kv helpers', () => {
 
     expect(first.stored).toBe(true)
     expect(second.stored).toBe(false)
-    expect(second.reason).toBe('duplicate')
+    if (!second.stored) {
+      expect(second.reason).toBe('duplicate')
+    }
   })
 
   it('lists codes sorted by newest timestamp', async () => {
@@ -37,5 +39,23 @@ describe('kv helpers', () => {
     const latest = await getLatest()
     expect(latest?.code).toBe('beta')
     expect(latest?.ts).toBe(4000)
+  })
+
+  it('prunes expired codes based on TTL', async () => {
+    vi.setSystemTime(0)
+    await saveCode('expire-me')
+
+    // Check it's there
+    let list = await listCodes()
+    expect(list.length).toBe(1)
+    expect(await getLatest()).not.toBeNull()
+
+    // Fast-forward past TTL (60s)
+    vi.setSystemTime(60_001)
+
+    // Should be gone
+    list = await listCodes()
+    expect(list.length).toBe(0)
+    expect(await getLatest()).toBeNull()
   })
 })

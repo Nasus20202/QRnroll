@@ -8,7 +8,7 @@ type WebhookResult = {
 const WEBHOOK_TIMEOUT_MS = 5000
 const RETRIES = 2
 
-export function getWebhookTargets(): string[] {
+export function getWebhookTargets(): Array<string> {
   const raw = (process.env.WEBHOOK_URLS ?? '').toString()
   return raw
     .split(',')
@@ -38,7 +38,7 @@ async function postOnce(url: string, payload: string): Promise<Response> {
 
 export async function fanOutWebhooks(
   payload: string,
-): Promise<WebhookResult[]> {
+): Promise<Array<WebhookResult>> {
   const targets = getWebhookTargets()
   if (!targets.length) return []
 

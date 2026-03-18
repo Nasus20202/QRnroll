@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import ScannerPage from '@/pages/ScannerPage'
 import type { ScannerPageProps } from '@/pages/ScannerPage'
-import { getCodes, postCode } from '@/server/codes'
 import type { SubmitResponse } from '@/server/codes'
+import ScannerPage from '@/pages/ScannerPage'
+import { getCodes, postCode } from '@/server/codes'
 
 type PostCodeArgs = Parameters<typeof postCode>[0]
 type PostCodeData = { data: { code: string } }
@@ -17,7 +17,7 @@ const submitCodeClient = async (code: string): Promise<SubmitResponse> => {
 const fetchCodesClient = async () => {
   const res = await getCodes()
   const payload = res instanceof Response ? await res.json() : res
-  return payload as { code: string; ts: number }[]
+  return payload as Array<{ code: string; ts: number }>
 }
 
 export const Route = createFileRoute('/')({

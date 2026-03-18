@@ -15,7 +15,7 @@ export const postCode = createServerFn({ method: 'POST' }).handler(
     const { code } = parse.data
     const stored = await saveCode(code)
     if (stored.stored) {
-      const ts = stored.record?.ts ?? Date.now()
+      const ts = stored.record.ts
       await fanOutWebhooks(
         `[QR code received at ${new Date(ts).toISOString()}](${code})`,
       )
@@ -24,8 +24,8 @@ export const postCode = createServerFn({ method: 'POST' }).handler(
     return {
       ok: true,
       stored: stored.stored,
-      reason: stored.reason,
-      ts: stored.record?.ts ?? null,
+      reason: stored.stored ? undefined : stored.reason,
+      ts: stored.stored ? stored.record.ts : null,
     }
   },
 )

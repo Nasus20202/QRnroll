@@ -9,7 +9,7 @@ them in new browser tabs, making bulk enrolment hands-free.
 
 Key runtime characteristics:
 
-- **In-memory store** with a 60-second TTL – no database, resets on restart.
+- **In-memory store** with a 60-second TTL (default) or **Valkey** KV store (`VALKEY_URL` env).
 - **Live code list** on the scanner page (polled every second).
 - Optional **webhook fan-out** (Discord-compatible) for each scanned code.
 
@@ -105,6 +105,7 @@ corresponding tests. Tests live alongside the code they cover in `__tests__/` su
 
 ```bash
 pnpm test               # run all tests once (CI mode)
+pnpm test:integration   # run integration tests (requires docker Valkey container)
 ```
 
 ### Testing philosophy
@@ -113,6 +114,7 @@ pnpm test               # run all tests once (CI mode)
 - **Component tests** for presentational components (`components/__tests__/`).
 - **Integration tests** for page-level components that combine state + effects + child
   components (`pages/__tests__/`).
+- **External Integration tests** for services requiring external dependencies (`*.integration.test.ts`), using pure Node instead of jsdom.
 
 ### Mocking patterns
 
