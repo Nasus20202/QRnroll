@@ -18,7 +18,7 @@ export type CameraPanelProps = {
   scanned: string | null
   status: Status
   zoom: number
-  zoomRange: ZoomRange | null
+  zoomRange: ZoomRange
   onZoomChange: (zoom: number) => void
 }
 
@@ -83,8 +83,7 @@ export function CameraPanel({
         </div>
       </div>
 
-      {zoomRange && (
-        <div
+      <div
           className="flex items-center gap-3 px-1"
           aria-label="Zoom control"
         >
@@ -128,7 +127,6 @@ export function CameraPanel({
             <Plus size={14} className="text-white" />
           </button>
         </div>
-      )}
 
       <div className="flex items-center gap-3 text-sm text-slate-200">
         {scanned ? (
