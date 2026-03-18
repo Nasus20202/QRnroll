@@ -2,3 +2,12 @@ node_modules
 dist
 .env
 .tanstack
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Coverage
+coverage/

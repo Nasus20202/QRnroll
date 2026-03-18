@@ -23,6 +23,9 @@ describe('ValkeyKv Integration', () => {
   afterAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (kv) {
+      // @ts-expect-error accessing private client for cleanup
+      const client = kv.client
+      await client.del(['codes'])
       await kv.close()
     }
   })

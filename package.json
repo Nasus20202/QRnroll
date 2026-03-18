@@ -11,9 +11,13 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:integration": "vitest run -c vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "format": "prettier --check .",
-    "check": "prettier --write . && eslint --fix"
+    "format:fix": "prettier --write .",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -38,6 +42,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tanstack/devtools-vite": "^0.6.0",
     "@tanstack/eslint-config": "^0.4.0",
     "@testing-library/dom": "^10.4.0",
@@ -48,6 +53,7 @@
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "@vitejs/plugin-react": "^6.0.0",
+    "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^10.0.0",
     "jsdom": "^29.0.0",
     "prettier": "^3.5.3",

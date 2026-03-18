@@ -9,6 +9,9 @@ import tailwindcss from '@tailwindcss/vite'
 const config = defineConfig({
   plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
   resolve: { tsconfigPaths: true },
+  optimizeDeps: {
+    exclude: ['@valkey/valkey-glide'],
+  },
 })
 
 export default config
