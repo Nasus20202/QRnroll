@@ -3,17 +3,23 @@ import {
   CheckCircle2,
   Info,
   Loader2,
+  Minus,
+  Plus,
   ScanLine,
   SwitchCamera,
 } from 'lucide-react'
+import * as Slider from '@radix-ui/react-slider'
 import type { RefObject } from 'react'
-import type { Status } from '@/pages/ScannerPage'
+import type { Status, ZoomRange } from '@/pages/ScannerPage'
 
 export type CameraPanelProps = {
   videoRef: RefObject<HTMLVideoElement | null>
   onSwitchCamera?: () => void
   scanned: string | null
   status: Status
+  zoom: number
+  zoomRange: ZoomRange | null
+  onZoomChange: (zoom: number) => void
 }
 
 const statusStyles: Record<Status['kind'], string> = {
@@ -44,6 +50,9 @@ export function CameraPanel({
   onSwitchCamera,
   scanned,
   status,
+  zoom,
+  zoomRange,
+  onZoomChange,
 }: CameraPanelProps) {
   return (
     <div className="space-y-3">
@@ -73,6 +82,53 @@ export function CameraPanel({
           <ScanLine className="text-emerald-300 w-24 h-24 opacity-70" />
         </div>
       </div>
+
+      {zoomRange && (
+        <div
+          className="flex items-center gap-3 px-1"
+          aria-label="Zoom control"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              const step = (zoomRange.max - zoomRange.min) / 10
+              onZoomChange(Math.max(zoomRange.min, zoom - step))
+            }}
+            aria-label="Zoom out"
+            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700"
+          >
+            <Minus size={14} className="text-white" />
+          </button>
+          <Slider.Root
+            value={[zoom]}
+            onValueChange={(value) => onZoomChange(value[0]!)}
+            min={zoomRange.min}
+            max={zoomRange.max}
+            step={zoomRange.step}
+            className="relative flex items-center select-none touch-none flex-1 h-5"
+            aria-label="Zoom"
+          >
+            <Slider.Track className="bg-slate-700 relative grow rounded-full h-1">
+              <Slider.Range className="absolute bg-emerald-400 rounded-full h-full" />
+            </Slider.Track>
+            <Slider.Thumb
+              className="block w-4 h-4 bg-white rounded-full shadow-sm focus:outline-none cursor-pointer"
+              aria-label="Zoom level"
+            />
+          </Slider.Root>
+          <button
+            type="button"
+            onClick={() => {
+              const step = (zoomRange.max - zoomRange.min) / 10
+              onZoomChange(Math.min(zoomRange.max, zoom + step))
+            }}
+            aria-label="Zoom in"
+            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700"
+          >
+            <Plus size={14} className="text-white" />
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center gap-3 text-sm text-slate-200">
         {scanned ? (
