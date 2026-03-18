@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
-import { PageHero } from '../PageHero'
+import { PageHero } from '@/components/PageHero'
 
 describe('PageHero', () => {
   it('renders eyebrow as link when href is provided', () => {

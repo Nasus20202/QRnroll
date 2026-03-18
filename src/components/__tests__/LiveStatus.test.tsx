@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
-import { LiveStatus } from '../LiveStatus'
+import { LiveStatus } from '@/components/LiveStatus'
 
 describe('LiveStatus', () => {
   it('shows status and last opened link', () => {

@@ -89,6 +89,13 @@ pnpm format     # check formatting
 
 Config: no semicolons, single quotes, trailing commas everywhere.
 
+### Import style
+
+Always use the `@/` path alias for imports within `src/`. The alias maps `@/` → `src/`, so use
+`@/components/Foo`, `@/lib/bar`, `@/pages/Baz`, `@/styles.css?url`, etc. Relative imports
+(`../`, `./`) must **not** be used for project source files. The only exception is the
+auto-generated `src/routeTree.gen.ts`, which manages its own imports.
+
 ---
 
 ## Testing

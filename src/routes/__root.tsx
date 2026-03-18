@@ -5,7 +5,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 
-import appCss from '../styles.css?url'
+import appCss from '@/styles.css?url'
 import { TrackingScript } from '@/components/TrackingScript'
 
 export const Route = createRootRoute({

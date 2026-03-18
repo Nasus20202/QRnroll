@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { fanOutWebhooks, getWebhookTargets } from '../webhooks'
+import { fanOutWebhooks, getWebhookTargets } from '@/lib/webhooks'
 
 const originalEnv = { ...process.env }
 

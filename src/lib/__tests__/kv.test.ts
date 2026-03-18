@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { __resetKV, getLatest, listCodes, saveCode } from '../kv'
+import { __resetKV, getLatest, listCodes, saveCode } from '@/lib/kv'
 
 describe('kv helpers', () => {
   beforeEach(() => {

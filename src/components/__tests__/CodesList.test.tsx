@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 
-import { CodesList } from '../CodesList'
+import { CodesList } from '@/components/CodesList'
 import type { CodeItem } from '@/pages/ScannerPage'
 
 describe('CodesList', () => {
