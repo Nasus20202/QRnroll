@@ -1,6 +1,20 @@
-import { describe, expect, it, vi, beforeEach, beforeAll, afterEach } from 'vitest'
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterEach,
+} from 'vitest'
 import type { Mock } from 'vitest'
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from '@testing-library/react'
 import ScannerPage from '../ScannerPage'
 import type { CodeItem, ScannerPageProps } from '../ScannerPage'
 
@@ -33,10 +47,7 @@ vi.mock('@zxing/browser', () => {
       (
         stream: unknown,
         video: unknown,
-        cb: (
-          result: { getText: () => string } | null,
-          err: unknown,
-        ) => void,
+        cb: (result: { getText: () => string } | null, err: unknown) => void,
       ) => {
         decodeCallback = cb
         // Wire the stream to the video element so applyZoom can read the
@@ -88,9 +99,7 @@ describe('ScannerPage', () => {
             // Track the deviceId used in each startDecoding call
             // (permission calls use facingMode and have no deviceId.exact).
             const deviceId = (
-              constraints.video as
-                | { deviceId?: { exact?: string } }
-                | undefined
+              constraints.video as { deviceId?: { exact?: string } } | undefined
             )?.deviceId?.exact
             if (deviceId) decodeCalls.push(deviceId)
             return Promise.resolve(makeNoZoomStream())
@@ -188,10 +197,9 @@ describe('ScannerPage', () => {
     // Default software range 1–5, step = (5-1)/10 = 0.4 → new zoom = 1.4
     await waitFor(() => {
       const thumb = screen.getByRole('slider', { name: 'Zoom level' })
-      expect(parseFloat(thumb.getAttribute('aria-valuenow') ?? '0')).toBeCloseTo(
-        1.4,
-        5,
-      )
+      expect(
+        parseFloat(thumb.getAttribute('aria-valuenow') ?? '0'),
+      ).toBeCloseTo(1.4, 5)
     })
   })
 
