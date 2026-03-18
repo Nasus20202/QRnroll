@@ -66,10 +66,25 @@ jobs:
         env:
           VALKEY_URL: valkey://localhost:6379
 
+      - name: Get Playwright version
+        run: echo "PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --json | jq -r '.[0].devDependencies[\"@playwright/test\"].version')" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Install Playwright OS Dependencies
+        run: pnpm exec playwright install-deps
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install
+
       - name: Test (E2E)
-        run: |
-          pnpm exec playwright install --with-deps
-          pnpm test:e2e
+        run: pnpm test:e2e
         env:
           VALKEY_URL: valkey://localhost:6379
 
