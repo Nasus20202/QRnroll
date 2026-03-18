@@ -29,6 +29,7 @@ export type ZoomRange = { min: number; max: number; step: number }
 
 const IDLE_STATUS: Status = { kind: 'idle', message: '' }
 const SCAN_COOLDOWN_MS = 2000
+const SOFTWARE_ZOOM_RANGE: ZoomRange = { min: 1, max: 5, step: 0.1 }
 
 export default function ScannerPage({
   submitCode,
@@ -38,13 +39,20 @@ export default function ScannerPage({
   const scanLock = useRef(false)
   const statusTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Software-zoom canvas pipeline refs
+  const srcVideoRef = useRef<HTMLVideoElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const drawLoopRef = useRef<number | null>(null)
+  const softwareZoomRef = useRef(1)
+  const zoomModeRef = useRef<'hardware' | 'software' | null>(null)
+
   const [scanned, setScanned] = useState<string | null>(null)
   const [codes, setCodes] = useState<CodeItem[]>([])
   const [status, setStatus] = useState<Status>(IDLE_STATUS)
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
   const currentDeviceIndexRef = useRef(0)
   const [zoom, setZoom] = useState(1)
-  const [zoomRange, setZoomRange] = useState<ZoomRange | null>(null)
+  const [zoomRange, setZoomRange] = useState<ZoomRange>(SOFTWARE_ZOOM_RANGE)
 
   const reader = useMemo(() => new BrowserMultiFormatReader(), [])
 
@@ -104,69 +112,42 @@ export default function ScannerPage({
     [submitCode, refreshCodes, setTimedStatus],
   )
 
-  const applyZoom = useCallback(async (newZoom: number) => {
-    const srcObj = videoRef.current?.srcObject
-    if (
-      !srcObj ||
-      typeof (srcObj as { getVideoTracks?: unknown }).getVideoTracks !== 'function'
-    )
-      return
-    const track = (srcObj as MediaStream).getVideoTracks()[0]
-    if (!track) return
-    try {
-      await track.applyConstraints({
-        advanced: [{ zoom: newZoom } as unknown as MediaTrackConstraintSet],
-      })
-      setZoom(newZoom)
-    } catch (err) {
-      console.error('Zoom error:', err)
+  const stopDrawLoop = useCallback(() => {
+    if (drawLoopRef.current !== null) {
+      cancelAnimationFrame(drawLoopRef.current)
+      drawLoopRef.current = null
     }
   }, [])
 
-  const startDecoding = useCallback(
-    async (deviceId?: string) => {
-      if (!videoRef.current) {
-        videoRef.current = document.createElement('video')
-      }
-
-      // Stop all existing tracks first so the camera hardware is fully released
-      // before we ask for a new stream. Without this, Android throws
-      // "could not start video source" when switching cameras.
-      const existing = videoRef.current.srcObject
-      const hadStream =
-        existing != null &&
-        typeof (existing as MediaStream).getTracks === 'function'
-      if (hadStream) {
-        ;(existing as MediaStream).getTracks().forEach((t) => t.stop())
-      }
-      videoRef.current.srcObject = null
-
-      // Android needs a brief moment after tracks are stopped before the
-      // hardware is actually available for a new stream. Only wait when we
-      // actually stopped an existing stream.
-      if (hadStream) {
-        await new Promise((resolve) => setTimeout(resolve, 300))
-      }
-
-      const resetFn = (reader as unknown as { reset?: () => void }).reset
-      if (typeof resetFn === 'function') resetFn.call(reader)
-
-      await reader.decodeFromVideoDevice(
-        deviceId,
-        videoRef.current,
-        (result, err) => {
-          if (result) {
-            handleScan(result.getText())
+  // Draws the current software-zoom crop from srcVideo onto the canvas.
+  // The canvas stream is fed to ZXing so the reader genuinely sees the
+  // cropped (zoomed-in) region, not just a CSS visual effect.
+  const startDrawLoop = useCallback(
+    (srcVideo: HTMLVideoElement, canvas: HTMLCanvasElement) => {
+      const draw = () => {
+        const { videoWidth: w, videoHeight: h } = srcVideo
+        if (w > 0 && h > 0) {
+          if (canvas.width !== w) canvas.width = w
+          if (canvas.height !== h) canvas.height = h
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            const z = softwareZoomRef.current
+            const cropW = w / z
+            const cropH = h / z
+            const offsetX = (w - cropW) / 2
+            const offsetY = (h - cropH) / 2
+            ctx.drawImage(srcVideo, offsetX, offsetY, cropW, cropH, 0, 0, w, h)
           }
-          if (err && !err.name.startsWith('NotFoundException')) {
-            console.error('Decode error:', err)
-          }
-        },
-      )
+        }
+        drawLoopRef.current = requestAnimationFrame(draw)
+      }
+      drawLoopRef.current = requestAnimationFrame(draw)
+    },
+    [],
+  )
 
-      // After the decode stream is open, read hardware zoom capabilities from
-      // the active video track.  Not all devices expose zoom, so we guard the
-      // UI with a null check.
+  const applyZoom = useCallback(async (newZoom: number) => {
+    if (zoomModeRef.current === 'hardware') {
       const srcObj = videoRef.current?.srcObject
       if (
         srcObj &&
@@ -175,26 +156,149 @@ export default function ScannerPage({
       ) {
         const track = (srcObj as MediaStream).getVideoTracks()[0]
         if (track) {
-          const rawCaps = track.getCapabilities() as MediaTrackCapabilities & {
-            zoom?: ZoomRange
-          }
-          if (rawCaps.zoom) {
-            const rawSettings = track.getSettings() as MediaTrackSettings & {
-              zoom?: number
-            }
-            setZoomRange({
-              min: rawCaps.zoom.min,
-              max: rawCaps.zoom.max,
-              step: rawCaps.zoom.step,
+          try {
+            await track.applyConstraints({
+              advanced: [{ zoom: newZoom } as unknown as MediaTrackConstraintSet],
             })
-            setZoom(rawSettings.zoom ?? rawCaps.zoom.min)
-          } else {
-            setZoomRange(null)
+          } catch (err) {
+            console.error('Zoom error:', err)
+            return
           }
         }
       }
+    } else {
+      // Software zoom: update the crop factor consumed by the draw loop
+      softwareZoomRef.current = newZoom
+    }
+    setZoom(newZoom)
+  }, [])
+
+  const startDecoding = useCallback(
+    async (deviceId?: string) => {
+      if (!videoRef.current) {
+        videoRef.current = document.createElement('video')
+      }
+
+      // Tear down any existing pipeline
+      stopDrawLoop()
+
+      const existingDisplay = videoRef.current.srcObject
+      const hadDisplayStream =
+        existingDisplay != null &&
+        typeof (existingDisplay as MediaStream).getTracks === 'function'
+      if (hadDisplayStream) {
+        ;(existingDisplay as MediaStream).getTracks().forEach((t) => t.stop())
+      }
+      videoRef.current.srcObject = null
+
+      if (srcVideoRef.current) {
+        const srcStream = srcVideoRef.current.srcObject as MediaStream | null
+        srcStream?.getTracks().forEach((t) => t.stop())
+        srcVideoRef.current.srcObject = null
+        srcVideoRef.current = null
+      }
+      canvasRef.current = null
+
+      // Android needs a brief moment after tracks are stopped before the
+      // hardware is actually available for a new stream. Only wait when we
+      // actually stopped an existing stream.
+      if (hadDisplayStream) {
+        await new Promise((resolve) => setTimeout(resolve, 300))
+      }
+
+      const resetFn = (reader as unknown as { reset?: () => void }).reset
+      if (typeof resetFn === 'function') resetFn.call(reader)
+
+      // Open the raw camera stream ourselves so we can inspect zoom capability
+      // before deciding which pipeline to start.
+      const rawStream = await navigator.mediaDevices.getUserMedia({
+        video: deviceId
+          ? { deviceId: { exact: deviceId } }
+          : { facingMode: { ideal: 'environment' } },
+      })
+
+      const rawTrack = rawStream.getVideoTracks()[0]
+      const rawCaps = rawTrack?.getCapabilities?.() as
+        | (MediaTrackCapabilities & { zoom?: ZoomRange })
+        | undefined
+
+      if (rawCaps?.zoom) {
+        // Hardware zoom available — feed the raw stream directly to ZXing.
+        zoomModeRef.current = 'hardware'
+        const rawSettings = rawTrack.getSettings() as MediaTrackSettings & {
+          zoom?: number
+        }
+        setZoomRange({
+          min: rawCaps.zoom.min,
+          max: rawCaps.zoom.max,
+          step: rawCaps.zoom.step,
+        })
+        setZoom(rawSettings.zoom ?? rawCaps.zoom.min)
+        softwareZoomRef.current = 1
+
+        await reader.decodeFromStream(rawStream, videoRef.current, (result, err) => {
+          if (result) handleScan(result.getText())
+          if (err && !err.name.startsWith('NotFoundException')) {
+            console.error('Decode error:', err)
+          }
+        })
+      } else {
+        // No hardware zoom — use a canvas crop pipeline so that the software
+        // zoom level genuinely affects what ZXing reads (not just CSS visuals).
+        zoomModeRef.current = 'software'
+        softwareZoomRef.current = 1
+        setZoom(1)
+        setZoomRange(SOFTWARE_ZOOM_RANGE)
+
+        // Source video receives the raw camera stream (not shown to the user).
+        const srcVideo = document.createElement('video')
+        srcVideo.muted = true
+        srcVideo.playsInline = true
+        srcVideo.autoplay = true
+        srcVideo.srcObject = rawStream
+        srcVideoRef.current = srcVideo
+        try {
+          await srcVideo.play()
+        } catch {
+          // play() is not supported in some environments (e.g. jsdom)
+        }
+
+        // Wait until the video has dimensions so the canvas is sized correctly.
+        // Use a short fallback timeout so this doesn't stall in environments
+        // (like jsdom) where loadedmetadata never fires.
+        await new Promise<void>((resolve) => {
+          if (srcVideo.videoWidth > 0) {
+            resolve()
+            return
+          }
+          const fallback = setTimeout(resolve, 0)
+          srcVideo.addEventListener('loadedmetadata', () => {
+            clearTimeout(fallback)
+            resolve()
+          }, { once: true })
+        })
+
+        const canvas = document.createElement('canvas')
+        canvas.width = srcVideo.videoWidth || 640
+        canvas.height = srcVideo.videoHeight || 480
+        canvasRef.current = canvas
+        startDrawLoop(srcVideo, canvas)
+
+        // The canvas stream is what ZXing reads — and what the <video> displays.
+        const canvasStream = canvas.captureStream(30)
+        await reader.decodeFromStream(
+          canvasStream,
+          videoRef.current,
+          (result, err) => {
+            if (result) handleScan(result.getText())
+            if (err && !err.name.startsWith('NotFoundException')) {
+              console.error('Decode error:', err)
+            }
+          },
+        )
+      }
     },
-    [handleScan, reader],
+    [handleScan, reader, stopDrawLoop, startDrawLoop],
   )
 
   const switchCamera = useCallback(async () => {
@@ -265,11 +369,16 @@ export default function ScannerPage({
     void init()
 
     return () => {
+      stopDrawLoop()
+      if (srcVideoRef.current) {
+        const srcStream = srcVideoRef.current.srcObject as MediaStream | null
+        srcStream?.getTracks().forEach((t) => t.stop())
+      }
       const resetFn = (reader as unknown as { reset?: () => void }).reset
       if (typeof resetFn === 'function') resetFn.call(reader)
       if (statusTimer.current) clearTimeout(statusTimer.current)
     }
-  }, [reader, handleScan, setTimedStatus])
+  }, [reader, handleScan, setTimedStatus, startDecoding, stopDrawLoop])
 
   useEffect(() => {
     void refreshCodes()

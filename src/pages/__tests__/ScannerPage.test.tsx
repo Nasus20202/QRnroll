@@ -1,56 +1,73 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, beforeAll, afterEach } from 'vitest'
 import type { Mock } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import ScannerPage from '../ScannerPage'
 import type { CodeItem, ScannerPageProps } from '../ScannerPage'
 
-let decodeCallback:
-  | ((result: { getText: () => string }, err: unknown) => void)
-  | null = null
-const decodeCalls: Array<string | undefined> = []
+// jsdom's HTMLVideoElement.srcObject setter rejects plain objects.
+// Override it with a WeakMap-backed getter/setter so tests can simulate
+// a MediaStream being attached to video elements in the pipeline.
+const srcObjectStore = new WeakMap<HTMLVideoElement, unknown>()
+beforeAll(() => {
+  Object.defineProperty(HTMLVideoElement.prototype, 'srcObject', {
+    get(this: HTMLVideoElement) {
+      return srcObjectStore.get(this) ?? null
+    },
+    set(this: HTMLVideoElement, val: unknown) {
+      srcObjectStore.set(this, val)
+    },
+    configurable: true,
+  })
+})
 
-// Tracks the applyConstraints mock for the most-recently created stream.
-let mockApplyConstraints: Mock = vi.fn()
+let decodeCallback:
+  | ((result: { getText: () => string } | null, err: unknown) => void)
+  | null = null
+
+// Tracks the deviceId passed to getUserMedia in each startDecoding call.
+const decodeCalls: string[] = []
 
 vi.mock('@zxing/browser', () => {
   class MockReader {
-    decodeFromVideoDevice = vi.fn(
+    decodeFromStream = vi.fn(
       (
-        id: string | undefined,
+        stream: unknown,
         video: unknown,
-        cb: (result: { getText: () => string } | null, err: unknown) => void,
+        cb: (
+          result: { getText: () => string } | null,
+          err: unknown,
+        ) => void,
       ) => {
-        decodeCalls.push(id)
         decodeCallback = cb
-
-        // Simulate ZXing opening a stream with hardware zoom capability.
-        if (video instanceof HTMLVideoElement) {
-          mockApplyConstraints = vi.fn().mockResolvedValue(undefined)
-          const mockTrack = {
-            getCapabilities: () => ({ zoom: { min: 1, max: 5, step: 0.1 } }),
-            getSettings: () => ({ zoom: 1 }),
-            applyConstraints: mockApplyConstraints,
-          }
-          const mockStream = {
-            getVideoTracks: () => [mockTrack],
-            getTracks: () => [{ stop: vi.fn() }],
-          }
-          Object.defineProperty(video, 'srcObject', {
-            value: mockStream,
-            writable: true,
-            configurable: true,
-          })
+        // Wire the stream to the video element so applyZoom can read the
+        // track (hardware path) and so srcObject is set on the display video.
+        if (
+          video instanceof HTMLVideoElement &&
+          stream != null &&
+          typeof (stream as { getVideoTracks?: unknown }).getVideoTracks ===
+            'function'
+        ) {
+          ;(video as { srcObject: unknown }).srcObject = stream
         }
-
         return Promise.resolve(undefined)
       },
     )
     reset = vi.fn()
   }
 
-  return {
-    BrowserMultiFormatReader: MockReader,
-  }
+  return { BrowserMultiFormatReader: MockReader }
+})
+
+// Default mock stream — no hardware zoom capability.
+const makeNoZoomStream = () => ({
+  getVideoTracks: () => [
+    {
+      getSettings: () => ({ deviceId: 'dev' }),
+      getCapabilities: () => ({}),
+      stop: vi.fn(),
+    },
+  ],
+  getTracks: () => [{ stop: vi.fn() }],
 })
 
 describe('ScannerPage', () => {
@@ -65,10 +82,19 @@ describe('ScannerPage', () => {
       writable: true,
       configurable: true,
       value: {
-        getUserMedia: vi.fn().mockResolvedValue({
-          getVideoTracks: () => [{ getSettings: () => ({ deviceId: 'dev' }) }],
-          getTracks: () => [{ stop: vi.fn() }],
-        }),
+        getUserMedia: vi
+          .fn()
+          .mockImplementation((constraints: MediaStreamConstraints) => {
+            // Track the deviceId used in each startDecoding call
+            // (permission calls use facingMode and have no deviceId.exact).
+            const deviceId = (
+              constraints.video as
+                | { deviceId?: { exact?: string } }
+                | undefined
+            )?.deviceId?.exact
+            if (deviceId) decodeCalls.push(deviceId)
+            return Promise.resolve(makeNoZoomStream())
+          }),
         enumerateDevices: vi
           .fn()
           .mockResolvedValue([
@@ -82,6 +108,7 @@ describe('ScannerPage', () => {
   })
 
   afterEach(() => {
+    cleanup()
     decodeCallback = null
     submitCode.mockReset()
     fetchCodes.mockReset()
@@ -143,26 +170,53 @@ describe('ScannerPage', () => {
     expect(decodeCalls[1]).toBe('dev-2')
   })
 
-  it('shows zoom controls when the camera exposes zoom capability', async () => {
+  it('always shows zoom controls (software zoom by default)', async () => {
     render(<ScannerPage submitCode={submitCode} fetchCodes={fetchCodes} />)
 
-    await waitFor(() =>
-      expect(screen.getByLabelText('Zoom out')).toBeTruthy(),
-    )
-    expect(screen.getByLabelText('Zoom in')).toBeTruthy()
+    // Zoom controls are rendered immediately with the software-zoom defaults.
+    expect(screen.getByRole('button', { name: 'Zoom out' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Zoom in' })).toBeTruthy()
   })
 
-  it('applies hardware zoom constraints when zoom changes via button', async () => {
+  it('software zoom updates zoom state without calling applyConstraints', async () => {
     render(<ScannerPage submitCode={submitCode} fetchCodes={fetchCodes} />)
 
-    await waitFor(() =>
-      expect(screen.getByLabelText('Zoom in')).toBeTruthy(),
-    )
+    await waitFor(() => expect(decodeCallback).toBeTruthy())
 
-    fireEvent.click(screen.getByLabelText('Zoom in'))
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }))
 
-    await waitFor(() => expect(mockApplyConstraints).toHaveBeenCalled())
-    const [constraints] = mockApplyConstraints.mock.calls[0] as [
+    // Default software range 1–5, step = (5-1)/10 = 0.4 → new zoom = 1.4
+    await waitFor(() => {
+      const thumb = screen.getByRole('slider', { name: 'Zoom level' })
+      expect(parseFloat(thumb.getAttribute('aria-valuenow') ?? '0')).toBeCloseTo(
+        1.4,
+        5,
+      )
+    })
+  })
+
+  it('applies hardware applyConstraints when camera exposes zoom capability', async () => {
+    const applyConstraints = vi.fn().mockResolvedValue(undefined)
+    const hwTrack = {
+      getSettings: () => ({ deviceId: 'dev', zoom: 1 }),
+      getCapabilities: () => ({ zoom: { min: 1, max: 5, step: 0.1 } }),
+      applyConstraints,
+      stop: vi.fn(),
+    }
+    const hwStream = {
+      getVideoTracks: () => [hwTrack],
+      getTracks: () => [hwTrack],
+    }
+    ;(navigator.mediaDevices.getUserMedia as Mock).mockResolvedValue(hwStream)
+
+    render(<ScannerPage submitCode={submitCode} fetchCodes={fetchCodes} />)
+
+    await waitFor(() => expect(decodeCallback).toBeTruthy())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }))
+
+    await waitFor(() => expect(applyConstraints).toHaveBeenCalled())
+    const [constraints] = applyConstraints.mock.calls[0] as [
       { advanced: Array<{ zoom: number }> },
     ]
     expect(constraints.advanced[0].zoom).toBeGreaterThan(1)

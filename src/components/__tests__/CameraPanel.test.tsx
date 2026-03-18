@@ -1,14 +1,18 @@
-import { describe, expect, it, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, expect, it, vi, afterEach } from 'vitest'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 
 import { CameraPanel } from '../CameraPanel'
+
+afterEach(() => cleanup())
+
+const DEFAULT_ZOOM_RANGE = { min: 1, max: 5, step: 0.1 }
 
 const baseProps = {
   videoRef: { current: document.createElement('video') },
   scanned: null,
   status: { kind: 'idle' as const, message: '' },
   zoom: 1,
-  zoomRange: null,
+  zoomRange: DEFAULT_ZOOM_RANGE,
   onZoomChange: vi.fn(),
 }
 
@@ -26,25 +30,12 @@ describe('CameraPanel', () => {
     expect(screen.getByText('Saved')).toBeTruthy()
   })
 
-  it('does not render zoom controls when zoomRange is null', () => {
-    render(<CameraPanel {...baseProps} zoomRange={null} />)
+  it('always renders zoom controls', () => {
+    render(<CameraPanel {...baseProps} />)
 
-    expect(screen.queryByLabelText('Zoom out')).toBeNull()
-    expect(screen.queryByLabelText('Zoom in')).toBeNull()
-  })
-
-  it('renders zoom controls when zoomRange is provided', () => {
-    render(
-      <CameraPanel
-        {...baseProps}
-        zoom={1}
-        zoomRange={{ min: 1, max: 5, step: 0.1 }}
-      />,
-    )
-
-    expect(screen.getByLabelText('Zoom out')).toBeTruthy()
-    expect(screen.getByLabelText('Zoom in')).toBeTruthy()
-    expect(screen.getByLabelText('Zoom level')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Zoom out' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Zoom in' })).toBeTruthy()
+    expect(screen.getByRole('slider', { name: 'Zoom level' })).toBeTruthy()
   })
 
   it('calls onZoomChange with incremented value when zoom-in is clicked', () => {
@@ -53,12 +44,12 @@ describe('CameraPanel', () => {
       <CameraPanel
         {...baseProps}
         zoom={1}
-        zoomRange={{ min: 1, max: 5, step: 0.1 }}
+        zoomRange={DEFAULT_ZOOM_RANGE}
         onZoomChange={onZoomChange}
       />,
     )
 
-    fireEvent.click(screen.getByLabelText('Zoom in'))
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }))
     // step = (5 - 1) / 10 = 0.4, capped at max 5
     expect(onZoomChange).toHaveBeenCalledWith(1.4)
   })
@@ -69,12 +60,12 @@ describe('CameraPanel', () => {
       <CameraPanel
         {...baseProps}
         zoom={3}
-        zoomRange={{ min: 1, max: 5, step: 0.1 }}
+        zoomRange={DEFAULT_ZOOM_RANGE}
         onZoomChange={onZoomChange}
       />,
     )
 
-    fireEvent.click(screen.getByLabelText('Zoom out'))
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom out' }))
     // step = 0.4, 3 - 0.4 = 2.6
     expect(onZoomChange).toHaveBeenCalledWith(2.6)
   })
@@ -85,12 +76,12 @@ describe('CameraPanel', () => {
       <CameraPanel
         {...baseProps}
         zoom={1}
-        zoomRange={{ min: 1, max: 5, step: 0.1 }}
+        zoomRange={DEFAULT_ZOOM_RANGE}
         onZoomChange={onZoomChange}
       />,
     )
 
-    fireEvent.click(screen.getByLabelText('Zoom out'))
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom out' }))
     expect(onZoomChange).toHaveBeenCalledWith(1)
   })
 
@@ -100,12 +91,12 @@ describe('CameraPanel', () => {
       <CameraPanel
         {...baseProps}
         zoom={5}
-        zoomRange={{ min: 1, max: 5, step: 0.1 }}
+        zoomRange={DEFAULT_ZOOM_RANGE}
         onZoomChange={onZoomChange}
       />,
     )
 
-    fireEvent.click(screen.getByLabelText('Zoom in'))
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }))
     expect(onZoomChange).toHaveBeenCalledWith(5)
   })
 })
