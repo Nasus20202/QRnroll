@@ -1,10 +1,13 @@
-import { z } from 'zod'
+import valley from 'valley'
 
-export const codePayloadSchema = z.object({
-  code: z.string().min(1, 'Code is required'),
-})
+export type CodePayload = { code: string }
 
-export type CodePayload = z.infer<typeof codePayloadSchema>
+const nonEmptyString = (value: unknown): boolean | Error => {
+  if (typeof value === 'string' && value.length > 0) return true
+  return new Error('Code must be a non-empty string')
+}
+
+export const validateCodePayload = valley({ code: nonEmptyString })
 
 export type StoredCode = {
   code: string

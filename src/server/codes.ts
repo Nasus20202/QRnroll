@@ -1,18 +1,16 @@
 import { createServerFn } from '@tanstack/react-start'
-import { codePayloadSchema, listCodes, saveCode } from '@/lib/kv'
+import type { CodePayload } from '@/lib/kv'
+import { validateCodePayload, listCodes, saveCode } from '@/lib/kv'
 import { fanOutWebhooks } from '@/lib/webhooks'
 
 export const postCode = createServerFn({ method: 'POST' }).handler(
   async ({ data }: { data?: unknown }) => {
-    const parse = codePayloadSchema.safeParse(data)
-    if (!parse.success) {
-      return Response.json(
-        { ok: false, error: parse.error.message },
-        { status: 400 },
-      )
+    const error = validateCodePayload(data)
+    if (error) {
+      return Response.json({ ok: false, error: error.message }, { status: 400 })
     }
 
-    const { code } = parse.data
+    const { code } = data as CodePayload
     const stored = await saveCode(code)
     if (stored.stored) {
       const ts = stored.record?.ts ?? Date.now()

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { __resetKV, getLatest, listCodes, saveCode } from '@/lib/kv'
+import { __resetKV, getLatest, listCodes, saveCode, validateCodePayload } from '@/lib/kv'
 
 describe('kv helpers', () => {
   beforeEach(() => {
@@ -37,5 +37,37 @@ describe('kv helpers', () => {
     const latest = await getLatest()
     expect(latest?.code).toBe('beta')
     expect(latest?.ts).toBe(4000)
+  })
+})
+
+describe('validateCodePayload', () => {
+  it('returns null for a valid code payload', () => {
+    expect(validateCodePayload({ code: 'abc123' })).toBeNull()
+  })
+
+  it('returns an error for a missing code field', () => {
+    const result = validateCodePayload({})
+    expect(result).toBeInstanceOf(Error)
+  })
+
+  it('returns an error for an empty string code', () => {
+    const result = validateCodePayload({ code: '' })
+    expect(result).toBeInstanceOf(Error)
+  })
+
+  it('returns an error for a non-string code', () => {
+    const result = validateCodePayload({ code: 42 })
+    expect(result).toBeInstanceOf(Error)
+  })
+
+  it('returns an error for non-object input', () => {
+    const result = validateCodePayload('not-an-object')
+    expect(result).toBeInstanceOf(Error)
+  })
+
+  it('returns an error for unknown extra keys', () => {
+    const result = validateCodePayload({ code: 'abc', extra: 'field' })
+    expect(result).toBeInstanceOf(Error)
+    expect(result?.message).toMatch(/extra/)
   })
 })
