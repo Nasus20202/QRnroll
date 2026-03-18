@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 
-import { NotificationOptInCard } from '../NotificationOptInCard'
+import { NotificationOptInCard } from '@/components/NotificationOptInCard'
 
 describe('NotificationOptInCard', () => {
   it('renders enable button when permission is default and fires handler', () => {

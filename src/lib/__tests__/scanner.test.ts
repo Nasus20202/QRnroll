@@ -5,7 +5,7 @@ import {
   SOFTWARE_ZOOM_RANGE,
   calcZoomStep,
   clampZoom,
-} from '../scanner'
+} from '@/lib/scanner'
 
 describe('calcZoomStep', () => {
   it('returns one tenth of the range span', () => {

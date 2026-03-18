@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pickRearDeviceIndex } from '../camera'
+import { pickRearDeviceIndex } from '@/lib/camera'
 
 const makeDevice = (deviceId: string, label: string): MediaDeviceInfo =>
   ({
