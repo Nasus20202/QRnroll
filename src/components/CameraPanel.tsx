@@ -10,7 +10,8 @@ import {
 } from 'lucide-react'
 import * as Slider from '@radix-ui/react-slider'
 import type { RefObject } from 'react'
-import type { Status, ZoomRange } from '@/pages/ScannerPage'
+import { calcZoomStep, clampZoom } from '@/lib/scanner'
+import type { Status, ZoomRange } from '@/lib/scanner'
 
 export type CameraPanelProps = {
   videoRef: RefObject<HTMLVideoElement | null>
@@ -87,8 +88,7 @@ export function CameraPanel({
         <button
           type="button"
           onClick={() => {
-            const step = (zoomRange.max - zoomRange.min) / 10
-            onZoomChange(Math.max(zoomRange.min, zoom - step))
+            onZoomChange(clampZoom(zoom - calcZoomStep(zoomRange), zoomRange))
           }}
           aria-label="Zoom out"
           className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700"
@@ -115,8 +115,7 @@ export function CameraPanel({
         <button
           type="button"
           onClick={() => {
-            const step = (zoomRange.max - zoomRange.min) / 10
-            onZoomChange(Math.min(zoomRange.max, zoom + step))
+            onZoomChange(clampZoom(zoom + calcZoomStep(zoomRange), zoomRange))
           }}
           aria-label="Zoom in"
           className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700"

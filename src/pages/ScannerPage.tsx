@@ -3,33 +3,26 @@ import { BrowserMultiFormatReader } from '@zxing/browser'
 import { CameraPanel } from '@/components/CameraPanel'
 import { CodesList } from '@/components/CodesList'
 import { PageHero } from '@/components/PageHero'
+import { pickRearDeviceIndex } from '@/lib/camera'
+import {
+  IDLE_STATUS,
+  SCAN_COOLDOWN_MS,
+  SOFTWARE_ZOOM_RANGE,
+} from '@/lib/scanner'
+import type {
+  CodeItem,
+  Status,
+  StatusKind,
+  SubmitResult,
+  ZoomRange,
+} from '@/lib/scanner'
 
-export type SubmitResult = {
-  ok: boolean
-  stored?: boolean
-  reason?: string
-  ts?: number | null
-}
-
-export type CodeItem = { code: string; ts: number }
+export type { CodeItem, Status, StatusKind, SubmitResult, ZoomRange }
 
 export type ScannerPageProps = {
   submitCode: (code: string) => Promise<SubmitResult>
   fetchCodes: () => Promise<CodeItem[]>
 }
-
-export type StatusKind = 'idle' | 'submitting' | 'success' | 'error' | 'info'
-
-export type Status = {
-  kind: StatusKind
-  message: string
-}
-
-export type ZoomRange = { min: number; max: number; step: number }
-
-const IDLE_STATUS: Status = { kind: 'idle', message: '' }
-const SCAN_COOLDOWN_MS = 2000
-const SOFTWARE_ZOOM_RANGE: ZoomRange = { min: 1, max: 5, step: 0.1 }
 
 export default function ScannerPage({
   submitCode,
@@ -347,14 +340,7 @@ export default function ScannerPage({
 
         // Pick the device the browser chose for 'environment', fall back to
         // a label search, then to index 0.
-        let startIndex = envDeviceId
-          ? videoDevices.findIndex((d) => d.deviceId === envDeviceId)
-          : -1
-        if (startIndex < 0)
-          startIndex = videoDevices.findIndex((d) =>
-            /back|rear|environment/i.test(d.label),
-          )
-        if (startIndex < 0) startIndex = 0
+        const startIndex = pickRearDeviceIndex(videoDevices, envDeviceId)
 
         currentDeviceIndexRef.current = startIndex
 
