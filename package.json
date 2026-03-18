@@ -25,6 +25,7 @@
     "@tanstack/react-router-ssr-query": "^1.131.7",
     "@tanstack/react-start": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
+    "@valkey/valkey-glide": "^2.2.7",
     "@zxing/browser": "^0.1.5",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
