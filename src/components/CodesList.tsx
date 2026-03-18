@@ -61,13 +61,13 @@ export function CodesList({
                 onClick={() => onOpen(item.code)}
                 className="text-left w-full"
               >
-                <p className="text-sm font-medium text-white truncate group-hover:text-emerald-200">
+                <span className="block text-sm font-medium text-white truncate group-hover:text-emerald-200">
                   {item.code}
-                </p>
-                <p className="text-xs text-slate-400">
+                </span>
+                <span className="block text-xs text-slate-400">
                   {Math.max(0, differenceInSeconds(now ?? item.ts, item.ts))}s
                   ago
-                </p>
+                </span>
               </button>
             </div>
             <button
