@@ -316,6 +316,11 @@ export default function ScannerPage({
   }, [devices, setTimedStatus, startDecoding])
 
   useEffect(() => {
+    // @ts-expect-error E2E testing hook
+    if (typeof window !== 'undefined') window.__e2e_handleScan = handleScan
+  }, [handleScan])
+
+  useEffect(() => {
     const init = async () => {
       try {
         // Request permission preferring the rear camera, and capture which

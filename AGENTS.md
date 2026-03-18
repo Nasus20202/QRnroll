@@ -76,7 +76,7 @@ Examples:
 
 ```bash
 pnpm lint       # check
-pnpm check      # auto-fix (prettier --write + eslint --fix)
+pnpm lint:fix   # auto-fix where possible
 ```
 
 Key rules: `@typescript-eslint/no-explicit-any` is an **error** – do not use `any`.
@@ -85,6 +85,7 @@ Key rules: `@typescript-eslint/no-explicit-any` is an **error** – do not use `
 
 ```bash
 pnpm format     # check formatting
+pnpm format:fix # auto-format
 ```
 
 Config: no semicolons, single quotes, trailing commas everywhere.
@@ -106,6 +107,7 @@ corresponding tests. Tests live alongside the code they cover in `__tests__/` su
 ```bash
 pnpm test               # run all tests once (CI mode)
 pnpm test:integration   # run integration tests (requires docker Valkey container)
+pnpm test:e2e          # run Playwright end-to-end tests
 ```
 
 ### Testing philosophy
@@ -115,6 +117,7 @@ pnpm test:integration   # run integration tests (requires docker Valkey containe
 - **Integration tests** for page-level components that combine state + effects + child
   components (`pages/__tests__/`).
 - **External Integration tests** for services requiring external dependencies (`*.integration.test.ts`), using pure Node instead of jsdom.
+- **End-to-end tests** for user flows, using Playwright to drive a real browser and optionally a real Valkey instance (via Docker in CI).
 
 ### Mocking patterns
 

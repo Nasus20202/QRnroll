@@ -17,3 +17,12 @@ HTMLCanvasElement.prototype.captureStream = function () {
     getTracks: () => [],
   } as unknown as MediaStream
 }
+
+// jsdom does not implement HTMLMediaElement.prototype.play and related methods.
+// Our camera components use <video autoPlay> or call .play() directly.
+// We provide no-op stubs to prevent 'Not implemented' errors in unit tests.
+if (typeof HTMLMediaElement !== 'undefined') {
+  HTMLMediaElement.prototype.play = async () => {}
+  HTMLMediaElement.prototype.pause = () => {}
+  HTMLMediaElement.prototype.load = () => {}
+}
