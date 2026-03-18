@@ -1,22 +1,14 @@
 //  @ts-check
 
-import tseslint from '@typescript-eslint/eslint-plugin'
 import { tanstackConfig } from '@tanstack/eslint-config'
 
 export default [
   ...tanstackConfig,
   {
-    plugins: {
-      '@typescript-eslint': tseslint,
-    },
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'error',
-    },
-  },
-  {
     files: ['src/**/*.{ts,tsx}'],
     ignores: ['src/routeTree.gen.ts'],
     rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
       'no-restricted-imports': [
         'error',
         {
