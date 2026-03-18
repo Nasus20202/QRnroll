@@ -49,7 +49,7 @@ test.describe('Scanner Page', () => {
     await expect(page.locator('text=Duplicate (ignored)').first()).toBeVisible()
 
     // The list should still only contain one entry for this code
-    const listItems = page.locator(`p:text("${testUrl}")`)
+    const listItems = page.locator('.group', { hasText: testUrl })
     await expect(listItems).toHaveCount(1)
   })
 
