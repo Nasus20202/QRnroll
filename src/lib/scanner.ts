@@ -29,3 +29,13 @@ export function calcZoomStep(range: ZoomRange): number {
 export function clampZoom(value: number, range: ZoomRange): number {
   return Math.min(range.max, Math.max(range.min, value))
 }
+
+/** Determines if a ZXing decode error is expected during continuous scanning. */
+export function isIgnorableDecodeError(err: Error): boolean {
+  return (
+    err.name.startsWith('NotFoundException') ||
+    err.name.startsWith('ChecksumException') ||
+    err.name.startsWith('FormatException') ||
+    err.message.includes('No MultiFormat Readers')
+  )
+}

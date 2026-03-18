@@ -15,6 +15,7 @@ import {
   IDLE_STATUS,
   SCAN_COOLDOWN_MS,
   SOFTWARE_ZOOM_RANGE,
+  isIgnorableDecodeError,
 } from '@/lib/scanner'
 
 export type { CodeItem, Status, StatusKind, SubmitResult, ZoomRange }
@@ -232,7 +233,7 @@ export default function ScannerPage({
           videoRef.current,
           (result, err) => {
             if (result) handleScan(result.getText())
-            if (err && !err.name.startsWith('NotFoundException')) {
+            if (err && !isIgnorableDecodeError(err)) {
               console.error('Decode error:', err)
             }
           },
@@ -290,7 +291,7 @@ export default function ScannerPage({
           videoRef.current,
           (result, err) => {
             if (result) handleScan(result.getText())
-            if (err && !err.name.startsWith('NotFoundException')) {
+            if (err && !isIgnorableDecodeError(err)) {
               console.error('Decode error:', err)
             }
           },
