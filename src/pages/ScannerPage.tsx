@@ -25,6 +25,8 @@ export type Status = {
   message: string
 }
 
+export type ZoomRange = { min: number; max: number; step: number }
+
 const IDLE_STATUS: Status = { kind: 'idle', message: '' }
 const SCAN_COOLDOWN_MS = 2000
 
@@ -41,6 +43,8 @@ export default function ScannerPage({
   const [status, setStatus] = useState<Status>(IDLE_STATUS)
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
   const currentDeviceIndexRef = useRef(0)
+  const [zoom, setZoom] = useState(1)
+  const [zoomRange, setZoomRange] = useState<ZoomRange | null>(null)
 
   const reader = useMemo(() => new BrowserMultiFormatReader(), [])
 
@@ -100,6 +104,25 @@ export default function ScannerPage({
     [submitCode, refreshCodes, setTimedStatus],
   )
 
+  const applyZoom = useCallback(async (newZoom: number) => {
+    const srcObj = videoRef.current?.srcObject
+    if (
+      !srcObj ||
+      typeof (srcObj as { getVideoTracks?: unknown }).getVideoTracks !== 'function'
+    )
+      return
+    const track = (srcObj as MediaStream).getVideoTracks()[0]
+    if (!track) return
+    try {
+      await track.applyConstraints({
+        advanced: [{ zoom: newZoom } as unknown as MediaTrackConstraintSet],
+      })
+      setZoom(newZoom)
+    } catch (err) {
+      console.error('Zoom error:', err)
+    }
+  }, [])
+
   const startDecoding = useCallback(
     async (deviceId?: string) => {
       if (!videoRef.current) {
@@ -140,6 +163,36 @@ export default function ScannerPage({
           }
         },
       )
+
+      // After the decode stream is open, read hardware zoom capabilities from
+      // the active video track.  Not all devices expose zoom, so we guard the
+      // UI with a null check.
+      const srcObj = videoRef.current?.srcObject
+      if (
+        srcObj &&
+        typeof (srcObj as { getVideoTracks?: unknown }).getVideoTracks ===
+          'function'
+      ) {
+        const track = (srcObj as MediaStream).getVideoTracks()[0]
+        if (track) {
+          const rawCaps = track.getCapabilities() as MediaTrackCapabilities & {
+            zoom?: ZoomRange
+          }
+          if (rawCaps.zoom) {
+            const rawSettings = track.getSettings() as MediaTrackSettings & {
+              zoom?: number
+            }
+            setZoomRange({
+              min: rawCaps.zoom.min,
+              max: rawCaps.zoom.max,
+              step: rawCaps.zoom.step,
+            })
+            setZoom(rawSettings.zoom ?? rawCaps.zoom.min)
+          } else {
+            setZoomRange(null)
+          }
+        }
+      }
     },
     [handleScan, reader],
   )
