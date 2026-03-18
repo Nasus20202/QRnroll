@@ -68,7 +68,7 @@ jobs:
 
       - name: Test (E2E)
         run: |
-          pnpm exec playwright install --with-deps
+          pnpm exec playwright install --with-deps chromium
           pnpm test:e2e
         env:
           VALKEY_URL: valkey://localhost:6379
