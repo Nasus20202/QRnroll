@@ -17,17 +17,17 @@ Key runtime characteristics:
 
 ## Tech stack
 
-| Layer | Tool |
-|---|---|
-| Package manager | **pnpm** – always use `pnpm` (never `npm` or `yarn`) |
-| Framework | **TanStack Start** (SSR-capable, file-based routing via TanStack Router) |
-| Build | **Vite** (with `@tailwindcss/vite` and `@tanstack/router-plugin`) |
-| Language | TypeScript – strict mode, no `any` |
-| Styling | Tailwind CSS v4 + Radix UI primitives |
-| QR scanning | `@zxing/browser` – `BrowserMultiFormatReader.decodeFromStream` |
-| Testing | **Vitest** + `@testing-library/react` (jsdom environment) |
-| Linting | **ESLint** (via `@tanstack/eslint-config`) |
-| Formatting | **Prettier** (single quotes, no semicolons, trailing commas) |
+| Layer           | Tool                                                                     |
+| --------------- | ------------------------------------------------------------------------ |
+| Package manager | **pnpm** – always use `pnpm` (never `npm` or `yarn`)                     |
+| Framework       | **TanStack Start** (SSR-capable, file-based routing via TanStack Router) |
+| Build           | **Vite** (with `@tailwindcss/vite` and `@tanstack/router-plugin`)        |
+| Language        | TypeScript – strict mode, no `any`                                       |
+| Styling         | Tailwind CSS v4 + Radix UI primitives                                    |
+| QR scanning     | `@zxing/browser` – `BrowserMultiFormatReader.decodeFromStream`           |
+| Testing         | **Vitest** + `@testing-library/react` (jsdom environment)                |
+| Linting         | **ESLint** (via `@tanstack/eslint-config`)                               |
+| Formatting      | **Prettier** (single quotes, no semicolons, trailing commas)             |
 
 ---
 
@@ -67,6 +67,7 @@ Types: feat | fix | refactor | test | chore | docs | style | perf | ci
 ```
 
 Examples:
+
 - `feat(scanner): add hardware zoom control`
 - `fix(kv): prevent race condition in TTL pruning`
 - `test(CameraPanel): cover zoom slider interaction`

@@ -234,12 +234,16 @@ export default function ScannerPage({
         setZoom(rawSettings.zoom ?? rawCaps.zoom.min)
         softwareZoomRef.current = 1
 
-        await reader.decodeFromStream(rawStream, videoRef.current, (result, err) => {
-          if (result) handleScan(result.getText())
-          if (err && !err.name.startsWith('NotFoundException')) {
-            console.error('Decode error:', err)
-          }
-        })
+        await reader.decodeFromStream(
+          rawStream,
+          videoRef.current,
+          (result, err) => {
+            if (result) handleScan(result.getText())
+            if (err && !err.name.startsWith('NotFoundException')) {
+              console.error('Decode error:', err)
+            }
+          },
+        )
       } else {
         // No hardware zoom — use a canvas crop pipeline so that the software
         // zoom level genuinely affects what ZXing reads (not just CSS visuals).
@@ -270,10 +274,14 @@ export default function ScannerPage({
             return
           }
           const fallback = setTimeout(resolve, 0)
-          srcVideo.addEventListener('loadedmetadata', () => {
-            clearTimeout(fallback)
-            resolve()
-          }, { once: true })
+          srcVideo.addEventListener(
+            'loadedmetadata',
+            () => {
+              clearTimeout(fallback)
+              resolve()
+            },
+            { once: true },
+          )
         })
 
         const canvas = document.createElement('canvas')
