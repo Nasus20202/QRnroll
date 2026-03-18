@@ -9,16 +9,39 @@ let decodeCallback:
   | null = null
 const decodeCalls: Array<string | undefined> = []
 
+// Tracks the applyConstraints mock for the most-recently created stream.
+let mockApplyConstraints: Mock = vi.fn()
+
 vi.mock('@zxing/browser', () => {
   class MockReader {
     decodeFromVideoDevice = vi.fn(
       (
         id: string | undefined,
-        _video: unknown,
+        video: unknown,
         cb: (result: { getText: () => string } | null, err: unknown) => void,
       ) => {
         decodeCalls.push(id)
         decodeCallback = cb
+
+        // Simulate ZXing opening a stream with hardware zoom capability.
+        if (video instanceof HTMLVideoElement) {
+          mockApplyConstraints = vi.fn().mockResolvedValue(undefined)
+          const mockTrack = {
+            getCapabilities: () => ({ zoom: { min: 1, max: 5, step: 0.1 } }),
+            getSettings: () => ({ zoom: 1 }),
+            applyConstraints: mockApplyConstraints,
+          }
+          const mockStream = {
+            getVideoTracks: () => [mockTrack],
+            getTracks: () => [{ stop: vi.fn() }],
+          }
+          Object.defineProperty(video, 'srcObject', {
+            value: mockStream,
+            writable: true,
+            configurable: true,
+          })
+        }
+
         return Promise.resolve(undefined)
       },
     )
@@ -118,5 +141,30 @@ describe('ScannerPage', () => {
 
     await waitFor(() => expect(decodeCalls.length).toBe(2))
     expect(decodeCalls[1]).toBe('dev-2')
+  })
+
+  it('shows zoom controls when the camera exposes zoom capability', async () => {
+    render(<ScannerPage submitCode={submitCode} fetchCodes={fetchCodes} />)
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('Zoom out')).toBeTruthy(),
+    )
+    expect(screen.getByLabelText('Zoom in')).toBeTruthy()
+  })
+
+  it('applies hardware zoom constraints when zoom changes via button', async () => {
+    render(<ScannerPage submitCode={submitCode} fetchCodes={fetchCodes} />)
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('Zoom in')).toBeTruthy(),
+    )
+
+    fireEvent.click(screen.getByLabelText('Zoom in'))
+
+    await waitFor(() => expect(mockApplyConstraints).toHaveBeenCalled())
+    const [constraints] = mockApplyConstraints.mock.calls[0] as [
+      { advanced: Array<{ zoom: number }> },
+    ]
+    expect(constraints.advanced[0].zoom).toBeGreaterThan(1)
   })
 })

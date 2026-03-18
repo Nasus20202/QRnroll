@@ -314,6 +314,9 @@ export default function ScannerPage({
             onSwitchCamera={devices.length > 1 ? switchCamera : undefined}
             scanned={scanned}
             status={status}
+            zoom={zoom}
+            zoomRange={zoomRange}
+            onZoomChange={applyZoom}
           />
         </div>
       </PageHero>
