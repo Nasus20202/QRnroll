@@ -155,15 +155,13 @@ export default function ScannerPage({
           'function'
       ) {
         const track = (srcObj as MediaStream).getVideoTracks()[0]
-        if (track) {
-          try {
-            await track.applyConstraints({
-              advanced: [{ zoom: newZoom } as unknown as MediaTrackConstraintSet],
-            })
-          } catch (err) {
-            console.error('Zoom error:', err)
-            return
-          }
+        try {
+          await track.applyConstraints({
+            advanced: [{ zoom: newZoom } as unknown as MediaTrackConstraintSet],
+          })
+        } catch (err) {
+          console.error('Zoom error:', err)
+          return
         }
       }
     } else {
@@ -218,7 +216,7 @@ export default function ScannerPage({
       })
 
       const rawTrack = rawStream.getVideoTracks()[0]
-      const rawCaps = rawTrack?.getCapabilities?.() as
+      const rawCaps = rawTrack.getCapabilities() as
         | (MediaTrackCapabilities & { zoom?: ZoomRange })
         | undefined
 

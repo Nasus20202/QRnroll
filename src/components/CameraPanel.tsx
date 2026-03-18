@@ -100,7 +100,7 @@ export function CameraPanel({
           </button>
           <Slider.Root
             value={[zoom]}
-            onValueChange={(value) => onZoomChange(value[0]!)}
+            onValueChange={(value) => onZoomChange(value[0] ?? zoom)}
             min={zoomRange.min}
             max={zoomRange.max}
             step={zoomRange.step}
@@ -126,6 +126,12 @@ export function CameraPanel({
           >
             <Plus size={14} className="text-white" />
           </button>
+          <span
+            className="text-xs text-slate-400 w-9 text-right tabular-nums"
+            aria-label="Current zoom"
+          >
+            {zoom.toFixed(1)}×
+          </span>
         </div>
 
       <div className="flex items-center gap-3 text-sm text-slate-200">

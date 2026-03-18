@@ -38,6 +38,11 @@ describe('CameraPanel', () => {
     expect(screen.getByRole('slider', { name: 'Zoom level' })).toBeTruthy()
   })
 
+  it('displays the current zoom level as text', () => {
+    render(<CameraPanel {...baseProps} zoom={2.4} />)
+    expect(screen.getByLabelText('Current zoom').textContent).toBe('2.4×')
+  })
+
   it('calls onZoomChange with incremented value when zoom-in is clicked', () => {
     const onZoomChange = vi.fn()
     render(
