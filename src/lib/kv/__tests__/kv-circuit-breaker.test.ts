@@ -13,12 +13,10 @@ import {
 
 function makePrimary(overrides?: Partial<KvBackend>): KvBackend {
   return {
-    saveCode: vi
-      .fn()
-      .mockResolvedValue({
-        stored: true as const,
-        record: { code: 'a', ts: 0 },
-      }),
+    saveCode: vi.fn().mockResolvedValue({
+      stored: true as const,
+      record: { code: 'a', ts: 0 },
+    }),
     listCodes: vi.fn().mockResolvedValue([]),
     getLatest: vi.fn().mockResolvedValue(null),
     close: vi.fn().mockResolvedValue(undefined),
@@ -28,12 +26,10 @@ function makePrimary(overrides?: Partial<KvBackend>): KvBackend {
 
 function makeFallback(): KvBackend {
   return {
-    saveCode: vi
-      .fn()
-      .mockResolvedValue({
-        stored: true as const,
-        record: { code: 'a', ts: 0 },
-      }),
+    saveCode: vi.fn().mockResolvedValue({
+      stored: true as const,
+      record: { code: 'a', ts: 0 },
+    }),
     listCodes: vi.fn().mockResolvedValue([{ code: 'fallback', ts: 1000 }]),
     getLatest: vi.fn().mockResolvedValue({ code: 'fallback', ts: 1000 }),
     close: vi.fn().mockResolvedValue(undefined),
@@ -215,6 +211,65 @@ describe('CircuitBreakerKv', () => {
     // Probe via getLatest (half-open, primary still fails → re-opens)
     await cb.getLatest()
     expect(cb.state).toBe('open')
+  })
+
+  it('logs each individual failure and the circuit-opened event', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const primary = makePrimary({ saveCode: vi.fn().mockRejectedValue(ERR) })
+    const cb = new CircuitBreakerKv(primary, makeFallback(), 3, 30_000)
+
+    await cb.saveCode('1')
+    await cb.saveCode('2')
+    await cb.saveCode('3')
+
+    // One per-failure log per call
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[circuit-breaker] primary error on saveCode (failure 1/3):',
+      ERR,
+    )
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[circuit-breaker] primary error on saveCode (failure 2/3):',
+      ERR,
+    )
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[circuit-breaker] primary error on saveCode (failure 3/3):',
+      ERR,
+    )
+    // Circuit-opened log (no error object attached)
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[circuit-breaker] open: primary backend unavailable, switching to in-memory fallback',
+    )
+
+    errorSpy.mockRestore()
+  })
+
+  it('logs circuit closed when half-open probe succeeds', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const saveCode = vi
+      .fn()
+      .mockRejectedValueOnce(ERR)
+      .mockResolvedValue({
+        stored: true as const,
+        record: { code: 'x', ts: 0 },
+      })
+    const cb = new CircuitBreakerKv(
+      makePrimary({ saveCode }),
+      makeFallback(),
+      1,
+      30_000,
+    )
+
+    await cb.saveCode('trip')
+    vi.setSystemTime(30_001)
+    await cb.saveCode('recover')
+
+    expect(logSpy).toHaveBeenCalledWith(
+      '[circuit-breaker] closed: primary backend recovered',
+    )
+
+    logSpy.mockRestore()
+    vi.mocked(console.error).mockRestore()
   })
 
   it('closes both primary and fallback on close()', async () => {

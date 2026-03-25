@@ -57,8 +57,12 @@ export class CircuitBreakerKv implements KvBackend {
     this._failures = 0
   }
 
-  private onFailure(err: unknown): void {
+  private onFailure(err: unknown, operation: string): void {
     this._failures++
+    console.error(
+      `[circuit-breaker] primary error on ${operation} (failure ${this._failures}/${this.threshold}):`,
+      err,
+    )
     if (this._state === 'half-open' || this._failures >= this.threshold) {
       const alreadyOpen = this._state === 'open'
       this._state = 'open'
@@ -66,7 +70,6 @@ export class CircuitBreakerKv implements KvBackend {
       if (!alreadyOpen) {
         console.error(
           '[circuit-breaker] open: primary backend unavailable, switching to in-memory fallback',
-          err,
         )
       }
     }
@@ -79,7 +82,7 @@ export class CircuitBreakerKv implements KvBackend {
       this.onSuccess()
       return result
     } catch (err) {
-      this.onFailure(err)
+      this.onFailure(err, 'saveCode')
       return this.fallback.saveCode(code)
     }
   }
@@ -91,7 +94,7 @@ export class CircuitBreakerKv implements KvBackend {
       this.onSuccess()
       return result
     } catch (err) {
-      this.onFailure(err)
+      this.onFailure(err, 'listCodes')
       return this.fallback.listCodes()
     }
   }
@@ -103,7 +106,7 @@ export class CircuitBreakerKv implements KvBackend {
       this.onSuccess()
       return result
     } catch (err) {
-      this.onFailure(err)
+      this.onFailure(err, 'getLatest')
       return this.fallback.getLatest()
     }
   }
