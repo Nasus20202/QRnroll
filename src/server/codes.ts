@@ -13,7 +13,22 @@ export const postCode = createServerFn({ method: 'POST' }).handler(
     }
 
     const { code } = parse.data
-    const stored = await saveCode(code)
+    let stored: Awaited<ReturnType<typeof saveCode>>
+    try {
+      stored = await saveCode(code)
+    } catch (err) {
+      console.error('[submit] store error for code:', code, err)
+      const ts = Date.now()
+      await fanOutWebhooks(
+        `[QR code received at ${new Date(ts).toISOString()}](${code})`,
+      )
+      return {
+        ok: false,
+        stored: false as const,
+        reason: 'store error' as const,
+        ts: null,
+      }
+    }
     if (stored.stored) {
       const ts = stored.record.ts
       await fanOutWebhooks(
