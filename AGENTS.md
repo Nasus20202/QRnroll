@@ -206,6 +206,9 @@ preserved (fallback is always `MemoryKv`, no operation should throw to the calle
 ## Keeping this file up to date
 
 `AGENTS.md` is the primary reference for anyone (human or AI agent) working on this codebase.
+`.github/copilot-instructions.md` is a symlink to this file so that the GitHub Copilot Coding
+Agent picks it up automatically – **edit only `AGENTS.md`**.
+
 **Update it whenever you make a change that affects how the project is understood or worked on** –
 new tools, changed conventions, new architectural patterns, or significant feature additions.
 Do not let it drift out of sync with the code.
