@@ -1,7 +1,8 @@
 import { z } from 'zod'
 
-import { MemoryKv } from '@/lib/kv-memory'
-import { ValkeyKv } from '@/lib/kv-valkey'
+import { CircuitBreakerKv } from '@/lib/kv/circuit-breaker'
+import { MemoryKv } from '@/lib/kv/memory'
+import { ValkeyKv } from '@/lib/kv/valkey'
 
 export const codePayloadSchema = z.object({
   code: z.string().min(1, 'Code is required'),
@@ -52,9 +53,17 @@ export async function getKvBackend(): Promise<KvBackend> {
   if (_backend) return _backend
   const url = process.env.VALKEY_URL || process.env.REDIS_URL
   if (url) {
-    _backend = await ValkeyKv.connect(url)
     const safeUrl = url.replace(/\/\/.*@/, '//***:***@') // redact credentials if present
-    console.log(`[kv] using Valkey backend: ${safeUrl}`)
+    try {
+      const valkey = await ValkeyKv.connect(url)
+      _backend = new CircuitBreakerKv(valkey, new MemoryKv())
+      console.log(`[kv] using Valkey backend with circuit breaker: ${safeUrl}`)
+    } catch (err) {
+      console.error(
+        `[kv] failed to connect to Valkey (${safeUrl}), falling back to in-memory backend: ${err instanceof Error ? err.message : String(err)}`,
+      )
+      _backend = new MemoryKv()
+    }
   } else {
     _backend = new MemoryKv()
     console.log('[kv] using in-memory backend')

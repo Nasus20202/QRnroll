@@ -14,7 +14,9 @@ async function getStoreOutcome(code: string): Promise<StoreOutcome> {
       ? { status: 'new', ts: result.record.ts }
       : { status: 'duplicate' }
   } catch (err) {
-    console.error('[submit] store error for code:', code, err)
+    console.error(
+      `[submit] store error for code: ${code} ${err instanceof Error ? err.message : String(err)}`,
+    )
     return { status: 'error' }
   }
 }

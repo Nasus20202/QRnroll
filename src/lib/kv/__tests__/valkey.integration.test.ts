@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { ValkeyKv } from '@/lib/kv-valkey'
+import { ValkeyKv } from '@/lib/kv/valkey'
 
 // We require a real Valkey instance for this test.
 // By default we assume it is running on localhost:6379 via docker-compose.

@@ -9,7 +9,8 @@ them in new browser tabs, making bulk enrolment hands-free.
 
 Key runtime characteristics:
 
-- **In-memory store** with a 60-second TTL (default) or **Valkey** KV store (`VALKEY_URL` env).
+- **In-memory store** with a 60-second TTL (default) or **Valkey** KV store (`VALKEY_URL` env),
+  wrapped in a **circuit-breaker** that falls back to in-memory when Valkey is unavailable.
 - **Live code list** on the scanner page (polled every second).
 - Optional **webhook fan-out** (Discord-compatible) for each scanned code.
 
@@ -151,9 +152,63 @@ supported (graceful no-op).
 
 ---
 
+## KV store architecture
+
+The scan-queue storage layer lives in `src/lib/kv/` and is composed of three classes behind a
+shared `KvBackend` interface:
+
+| File                 | Class              | Role                                                                  |
+| -------------------- | ------------------ | --------------------------------------------------------------------- |
+| `memory.ts`          | `MemoryKv`         | Volatile in-process store. Always available; data is lost on restart. |
+| `valkey.ts`          | `ValkeyKv`         | Persistent Valkey/Redis backend. Used when `VALKEY_URL` is set.       |
+| `circuit-breaker.ts` | `CircuitBreakerKv` | Wraps any primary backend with automatic in-memory fallback.          |
+
+### Circuit-breaker states
+
+```
+            ┌─────────────────────────────┐
+            │  failure count >= threshold  │
+  CLOSED ──────────────────────────────────► OPEN
+    ▲                                          │
+    │  probe succeeds                          │ recovery window elapsed
+    │                                          ▼
+    └──────────────────────────── HALF-OPEN ◄──┘
+                                  │
+                                  │ probe fails
+                                  ▼
+                                 OPEN  (timer resets)
+```
+
+- **closed** – all operations go to the primary (Valkey) backend.
+- **open** – primary is bypassed; reads/writes go to the in-memory fallback.
+  After `recoveryMs` (default **30 000 ms**) the breaker transitions to _half-open_.
+- **half-open** – the next operation probes the primary.
+  Success → _closed_. Failure → _open_ (timer resets).
+
+Default constants (exported from `circuit-breaker.ts`):
+
+```typescript
+export const DEFAULT_THRESHOLD = 3 // consecutive failures before opening
+export const DEFAULT_RECOVERY_MS = 30_000
+```
+
+### Backend selection at startup (`src/lib/kv/index.ts`)
+
+1. `VALKEY_URL` (or `REDIS_URL`) set → `ValkeyKv` wrapped in `CircuitBreakerKv` + `MemoryKv`.
+2. Connection to Valkey fails at startup → plain `MemoryKv` for the process lifetime.
+3. Neither env var set → plain `MemoryKv`.
+
+When working on anything that touches the KV layer, ensure the circuit-breaker invariants are
+preserved (fallback is always `MemoryKv`, no operation should throw to the caller).
+
+---
+
 ## Keeping this file up to date
 
 `AGENTS.md` is the primary reference for anyone (human or AI agent) working on this codebase.
+`.github/copilot-instructions.md` is a symlink to this file so that the GitHub Copilot Coding
+Agent picks it up automatically – **edit only `AGENTS.md`**.
+
 **Update it whenever you make a change that affects how the project is understood or worked on** –
 new tools, changed conventions, new architectural patterns, or significant feature additions.
 Do not let it drift out of sync with the code.

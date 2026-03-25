@@ -38,6 +38,22 @@ docker compose up --build
 - `TRACKING_SCRIPT` (optional): raw `<script>` snippet injected into the app shell.
   - Example: `TRACKING_SCRIPT='<script src="https://app.rybbit.io/api/script.js" data-site-id="abc" defer></script>'`
 
+### Valkey backend & circuit breaker
+
+When `VALKEY_URL` is set, the app wraps the Valkey connection in a **circuit-breaker** (`src/lib/kv/circuit-breaker.ts`) that automatically falls back to the in-memory store if Valkey becomes unavailable, keeping the app fully operational.
+
+The breaker has three states:
+
+| State         | Behaviour                                                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **closed**    | Every operation goes to Valkey (normal operation).                                                                                             |
+| **open**      | Valkey is skipped; all reads/writes hit the in-memory fallback. After the recovery window (default **30 s**) the breaker moves to _half-open_. |
+| **half-open** | The next operation probes Valkey. On success the breaker closes; on failure it reopens and the timer resets.                                   |
+
+The breaker opens after **3 consecutive Valkey failures** (configurable via `DEFAULT_THRESHOLD` / `DEFAULT_RECOVERY_MS` constants in the source).
+
+If the initial connection to Valkey fails at startup the app logs a warning and runs entirely on the in-memory backend for that process lifetime.
+
 ### Key routes
 
 - `/` – scanner + live list
