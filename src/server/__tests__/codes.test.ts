@@ -47,41 +47,47 @@ describe('postCode handler', () => {
     vi.clearAllMocks()
   })
 
-  it('fans out webhooks after a successful store', async () => {
-    const mockTimestamp = 1_000_000
-    mockSaveCode.mockResolvedValueOnce({
-      stored: true,
-      record: { code: 'https://example.com', ts: mockTimestamp },
+  describe('outcome: new', () => {
+    it('fans out webhooks exactly once with the stored timestamp', async () => {
+      const mockTimestamp = 1_000_000
+      mockSaveCode.mockResolvedValueOnce({
+        stored: true,
+        record: { code: 'https://example.com', ts: mockTimestamp },
+      })
+
+      const result = await handler({ data: { code: 'https://example.com' } })
+
+      expect(mockFanOut).toHaveBeenCalledOnce()
+      expect(mockFanOut).toHaveBeenCalledWith(
+        expect.stringContaining('https://example.com'),
+      )
+      expect(result).toMatchObject({ ok: true, stored: true, ts: mockTimestamp })
     })
-
-    const result = await handler({ data: { code: 'https://example.com' } })
-
-    expect(mockFanOut).toHaveBeenCalledOnce()
-    expect(mockFanOut).toHaveBeenCalledWith(
-      expect.stringContaining('https://example.com'),
-    )
-    expect(result).toMatchObject({ ok: true, stored: true, ts: mockTimestamp })
   })
 
-  it('does not fan out webhooks for a duplicate code', async () => {
-    mockSaveCode.mockResolvedValueOnce({ stored: false, reason: 'duplicate' })
+  describe('outcome: duplicate', () => {
+    it('does not fan out webhooks for a duplicate code', async () => {
+      mockSaveCode.mockResolvedValueOnce({ stored: false, reason: 'duplicate' })
 
-    const result = await handler({ data: { code: 'https://example.com' } })
+      const result = await handler({ data: { code: 'https://example.com' } })
 
-    expect(mockFanOut).not.toHaveBeenCalled()
-    expect(result).toMatchObject({ ok: true, stored: false, reason: 'duplicate' })
+      expect(mockFanOut).not.toHaveBeenCalled()
+      expect(result).toMatchObject({ ok: true, stored: false, reason: 'duplicate' })
+    })
   })
 
-  it('fans out webhooks as fallback when the store throws an error', async () => {
-    mockSaveCode.mockRejectedValueOnce(new Error('connection refused'))
+  describe('outcome: error', () => {
+    it('fans out webhooks exactly once as fallback when the store throws', async () => {
+      mockSaveCode.mockRejectedValueOnce(new Error('connection refused'))
 
-    const result = await handler({ data: { code: 'https://example.com' } })
+      const result = await handler({ data: { code: 'https://example.com' } })
 
-    expect(mockFanOut).toHaveBeenCalledOnce()
-    expect(mockFanOut).toHaveBeenCalledWith(
-      expect.stringContaining('https://example.com'),
-    )
-    expect(result).toMatchObject({ ok: false, stored: false, reason: 'store error' })
+      expect(mockFanOut).toHaveBeenCalledOnce()
+      expect(mockFanOut).toHaveBeenCalledWith(
+        expect.stringContaining('https://example.com'),
+      )
+      expect(result).toMatchObject({ ok: false, stored: false, reason: 'store error' })
+    })
   })
 
   it('returns 400 for invalid payload without fanning out', async () => {

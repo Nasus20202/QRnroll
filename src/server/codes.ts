@@ -2,6 +2,23 @@ import { createServerFn } from '@tanstack/react-start'
 import { codePayloadSchema, listCodes, saveCode } from '@/lib/kv'
 import { fanOutWebhooks } from '@/lib/webhooks'
 
+type StoreOutcome =
+  | { status: 'new'; ts: number }
+  | { status: 'duplicate' }
+  | { status: 'error' }
+
+async function getStoreOutcome(code: string): Promise<StoreOutcome> {
+  try {
+    const result = await saveCode(code)
+    return result.stored
+      ? { status: 'new', ts: result.record.ts }
+      : { status: 'duplicate' }
+  } catch (err) {
+    console.error('[submit] store error for code:', code, err)
+    return { status: 'error' }
+  }
+}
+
 export const postCode = createServerFn({ method: 'POST' }).handler(
   async ({ data }: { data?: unknown }) => {
     const parse = codePayloadSchema.safeParse(data)
@@ -13,34 +30,26 @@ export const postCode = createServerFn({ method: 'POST' }).handler(
     }
 
     const { code } = parse.data
-    let stored: Awaited<ReturnType<typeof saveCode>>
-    try {
-      stored = await saveCode(code)
-    } catch (err) {
-      console.error('[submit] store error for code:', code, err)
-      const ts = Date.now()
-      await fanOutWebhooks(
-        `[QR code received at ${new Date(ts).toISOString()}](${code})`,
-      )
-      return {
-        ok: false,
-        stored: false as const,
-        reason: 'store error' as const,
-        ts: null,
-      }
-    }
-    if (stored.stored) {
-      const ts = stored.record.ts
+    const outcome = await getStoreOutcome(code)
+    const ts = outcome.status === 'new' ? outcome.ts : Date.now()
+
+    if (outcome.status !== 'duplicate') {
       await fanOutWebhooks(
         `[QR code received at ${new Date(ts).toISOString()}](${code})`,
       )
     }
-    console.log('[submit] code:', code, 'stored:', stored.stored)
+
+    console.log('[submit] code:', code, 'status:', outcome.status)
     return {
-      ok: true,
-      stored: stored.stored,
-      reason: stored.stored ? undefined : stored.reason,
-      ts: stored.stored ? stored.record.ts : null,
+      ok: outcome.status !== 'error',
+      stored: outcome.status === 'new',
+      reason:
+        outcome.status === 'duplicate'
+          ? ('duplicate' as const)
+          : outcome.status === 'error'
+            ? ('store error' as const)
+            : undefined,
+      ts: outcome.status === 'new' ? outcome.ts : null,
     }
   },
 )
