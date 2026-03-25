@@ -5,7 +5,7 @@ import {
   CircuitBreakerKv,
   DEFAULT_RECOVERY_MS,
   DEFAULT_THRESHOLD,
-} from '@/lib/kv-circuit-breaker'
+} from '@/lib/kv/circuit-breaker'
 
 // ---------------------------------------------------------------------------
 // Helpers

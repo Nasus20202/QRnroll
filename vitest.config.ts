@@ -17,7 +17,7 @@ export default defineConfig({
       exclude: [
         '**/*.integration.test.ts',
         '**/e2e/**',
-        'src/lib/kv-valkey.ts', // Tested with integration tests
+        'src/lib/kv/valkey.ts', // Tested with integration tests
       ],
       thresholds: {
         lines: 75,

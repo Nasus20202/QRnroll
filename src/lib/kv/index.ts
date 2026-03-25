@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
-import { CircuitBreakerKv } from '@/lib/kv-circuit-breaker'
-import { MemoryKv } from '@/lib/kv-memory'
-import { ValkeyKv } from '@/lib/kv-valkey'
+import { CircuitBreakerKv } from '@/lib/kv/circuit-breaker'
+import { MemoryKv } from '@/lib/kv/memory'
+import { ValkeyKv } from '@/lib/kv/valkey'
 
 export const codePayloadSchema = z.object({
   code: z.string().min(1, 'Code is required'),
