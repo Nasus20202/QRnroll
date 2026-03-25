@@ -21,7 +21,10 @@ vi.mock('@/lib/kv', () => ({
         typeof (data as Record<string, unknown>).code === 'string' &&
         (data as Record<string, unknown>).code !== ''
       ) {
-        return { success: true, data: { code: (data as { code: string }).code } }
+        return {
+          success: true,
+          data: { code: (data as { code: string }).code },
+        }
       }
       return { success: false, error: { message: 'invalid' } }
     },
@@ -40,7 +43,9 @@ const mockFanOut = vi.mocked(fanOutWebhooks)
 
 // After our mock, createServerFn().handler(fn) returns fn directly, so postCode
 // is the raw async handler. Cast to its actual call signature for test calls.
-const handler = postCode as unknown as (ctx: { data?: unknown }) => Promise<unknown>
+const handler = postCode as unknown as (ctx: {
+  data?: unknown
+}) => Promise<unknown>
 
 describe('postCode handler', () => {
   beforeEach(() => {
@@ -61,7 +66,11 @@ describe('postCode handler', () => {
       expect(mockFanOut).toHaveBeenCalledWith(
         expect.stringContaining('https://example.com'),
       )
-      expect(result).toMatchObject({ ok: true, stored: true, ts: mockTimestamp })
+      expect(result).toMatchObject({
+        ok: true,
+        stored: true,
+        ts: mockTimestamp,
+      })
     })
   })
 
@@ -72,7 +81,11 @@ describe('postCode handler', () => {
       const result = await handler({ data: { code: 'https://example.com' } })
 
       expect(mockFanOut).not.toHaveBeenCalled()
-      expect(result).toMatchObject({ ok: true, stored: false, reason: 'duplicate' })
+      expect(result).toMatchObject({
+        ok: true,
+        stored: false,
+        reason: 'duplicate',
+      })
     })
   })
 
@@ -86,7 +99,11 @@ describe('postCode handler', () => {
       expect(mockFanOut).toHaveBeenCalledWith(
         expect.stringContaining('https://example.com'),
       )
-      expect(result).toMatchObject({ ok: false, stored: false, reason: 'store error' })
+      expect(result).toMatchObject({
+        ok: false,
+        stored: false,
+        reason: 'store error',
+      })
     })
   })
 
