@@ -157,11 +157,11 @@ supported (graceful no-op).
 The scan-queue storage layer lives in `src/lib/kv/` and is composed of three classes behind a
 shared `KvBackend` interface:
 
-| File | Class | Role |
-|------|-------|------|
-| `memory.ts` | `MemoryKv` | Volatile in-process store. Always available; data is lost on restart. |
-| `valkey.ts` | `ValkeyKv` | Persistent Valkey/Redis backend. Used when `VALKEY_URL` is set. |
-| `circuit-breaker.ts` | `CircuitBreakerKv` | Wraps any primary backend with automatic in-memory fallback. |
+| File                 | Class              | Role                                                                  |
+| -------------------- | ------------------ | --------------------------------------------------------------------- |
+| `memory.ts`          | `MemoryKv`         | Volatile in-process store. Always available; data is lost on restart. |
+| `valkey.ts`          | `ValkeyKv`         | Persistent Valkey/Redis backend. Used when `VALKEY_URL` is set.       |
+| `circuit-breaker.ts` | `CircuitBreakerKv` | Wraps any primary backend with automatic in-memory fallback.          |
 
 ### Circuit-breaker states
 
@@ -181,14 +181,14 @@ shared `KvBackend` interface:
 
 - **closed** – all operations go to the primary (Valkey) backend.
 - **open** – primary is bypassed; reads/writes go to the in-memory fallback.
-  After `recoveryMs` (default **30 000 ms**) the breaker transitions to *half-open*.
+  After `recoveryMs` (default **30 000 ms**) the breaker transitions to _half-open_.
 - **half-open** – the next operation probes the primary.
-  Success → *closed*. Failure → *open* (timer resets).
+  Success → _closed_. Failure → _open_ (timer resets).
 
 Default constants (exported from `circuit-breaker.ts`):
 
 ```typescript
-export const DEFAULT_THRESHOLD = 3    // consecutive failures before opening
+export const DEFAULT_THRESHOLD = 3 // consecutive failures before opening
 export const DEFAULT_RECOVERY_MS = 30_000
 ```
 
