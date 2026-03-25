@@ -2,6 +2,23 @@ import { createServerFn } from '@tanstack/react-start'
 import { codePayloadSchema, listCodes, saveCode } from '@/lib/kv'
 import { fanOutWebhooks } from '@/lib/webhooks'
 
+type StoreOutcome =
+  | { status: 'new'; ts: number }
+  | { status: 'duplicate' }
+  | { status: 'error' }
+
+async function getStoreOutcome(code: string): Promise<StoreOutcome> {
+  try {
+    const result = await saveCode(code)
+    return result.stored
+      ? { status: 'new', ts: result.record.ts }
+      : { status: 'duplicate' }
+  } catch (err) {
+    console.error('[submit] store error for code:', code, err)
+    return { status: 'error' }
+  }
+}
+
 export const postCode = createServerFn({ method: 'POST' }).handler(
   async ({ data }: { data?: unknown }) => {
     const parse = codePayloadSchema.safeParse(data)
@@ -13,19 +30,34 @@ export const postCode = createServerFn({ method: 'POST' }).handler(
     }
 
     const { code } = parse.data
-    const stored = await saveCode(code)
-    if (stored.stored) {
-      const ts = stored.record.ts
-      await fanOutWebhooks(
-        `[QR code received at ${new Date(ts).toISOString()}](${code})`,
-      )
-    }
-    console.log('[submit] code:', code, 'stored:', stored.stored)
-    return {
-      ok: true,
-      stored: stored.stored,
-      reason: stored.stored ? undefined : stored.reason,
-      ts: stored.stored ? stored.record.ts : null,
+    const outcome = await getStoreOutcome(code)
+
+    console.log('[submit] code:', code, 'status:', outcome.status)
+    switch (outcome.status) {
+      case 'new':
+        await fanOutWebhooks(
+          `[QR code received at ${new Date(outcome.ts).toISOString()}](${code})`,
+        )
+        return { ok: true, stored: true, reason: undefined, ts: outcome.ts }
+
+      case 'duplicate':
+        return {
+          ok: true,
+          stored: false,
+          reason: 'duplicate' as const,
+          ts: null,
+        }
+
+      case 'error':
+        await fanOutWebhooks(
+          `[QR code received at ${new Date(Date.now()).toISOString()}](${code})`,
+        )
+        return {
+          ok: false,
+          stored: false,
+          reason: 'store error' as const,
+          ts: null,
+        }
     }
   },
 )
