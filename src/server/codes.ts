@@ -31,25 +31,33 @@ export const postCode = createServerFn({ method: 'POST' }).handler(
 
     const { code } = parse.data
     const outcome = await getStoreOutcome(code)
-    const ts = outcome.status === 'new' ? outcome.ts : Date.now()
-
-    if (outcome.status !== 'duplicate') {
-      await fanOutWebhooks(
-        `[QR code received at ${new Date(ts).toISOString()}](${code})`,
-      )
-    }
 
     console.log('[submit] code:', code, 'status:', outcome.status)
-    return {
-      ok: outcome.status !== 'error',
-      stored: outcome.status === 'new',
-      reason:
-        outcome.status === 'duplicate'
-          ? ('duplicate' as const)
-          : outcome.status === 'error'
-            ? ('store error' as const)
-            : undefined,
-      ts: outcome.status === 'new' ? outcome.ts : null,
+    switch (outcome.status) {
+      case 'new':
+        await fanOutWebhooks(
+          `[QR code received at ${new Date(outcome.ts).toISOString()}](${code})`,
+        )
+        return { ok: true, stored: true, reason: undefined, ts: outcome.ts }
+
+      case 'duplicate':
+        return {
+          ok: true,
+          stored: false,
+          reason: 'duplicate' as const,
+          ts: null,
+        }
+
+      case 'error':
+        await fanOutWebhooks(
+          `[QR code received at ${new Date(Date.now()).toISOString()}](${code})`,
+        )
+        return {
+          ok: false,
+          stored: false,
+          reason: 'store error' as const,
+          ts: null,
+        }
     }
   },
 )
