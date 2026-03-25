@@ -60,8 +60,7 @@ export async function getKvBackend(): Promise<KvBackend> {
       console.log(`[kv] using Valkey backend with circuit breaker: ${safeUrl}`)
     } catch (err) {
       console.error(
-        `[kv] failed to connect to Valkey (${safeUrl}), falling back to in-memory backend:`,
-        err,
+        `[kv] failed to connect to Valkey (${safeUrl}), falling back to in-memory backend: ${err instanceof Error ? err.message : String(err)}`,
       )
       _backend = new MemoryKv()
     }

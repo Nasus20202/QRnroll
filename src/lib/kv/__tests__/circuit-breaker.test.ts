@@ -224,16 +224,13 @@ describe('CircuitBreakerKv', () => {
 
     // One per-failure log per call
     expect(errorSpy).toHaveBeenCalledWith(
-      '[circuit-breaker] primary error on saveCode (failure 1/3):',
-      ERR,
+      '[circuit-breaker] primary error on saveCode (failure 1/3): connection refused',
     )
     expect(errorSpy).toHaveBeenCalledWith(
-      '[circuit-breaker] primary error on saveCode (failure 2/3):',
-      ERR,
+      '[circuit-breaker] primary error on saveCode (failure 2/3): connection refused',
     )
     expect(errorSpy).toHaveBeenCalledWith(
-      '[circuit-breaker] primary error on saveCode (failure 3/3):',
-      ERR,
+      '[circuit-breaker] primary error on saveCode (failure 3/3): connection refused',
     )
     // Circuit-opened log (no error object attached)
     expect(errorSpy).toHaveBeenCalledWith(

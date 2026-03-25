@@ -59,9 +59,9 @@ export class CircuitBreakerKv implements KvBackend {
 
   private onFailure(err: unknown, operation: string): void {
     this._failures++
+    const message = err instanceof Error ? err.message : String(err)
     console.error(
-      `[circuit-breaker] primary error on ${operation} (failure ${this._failures}/${this.threshold}):`,
-      err,
+      `[circuit-breaker] primary error on ${operation} (failure ${this._failures}/${this.threshold}): ${message}`,
     )
     if (this._state === 'half-open' || this._failures >= this.threshold) {
       const alreadyOpen = this._state === 'open'
