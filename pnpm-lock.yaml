@@ -67,7 +67,7 @@ importers:
         version: 4.2.4
       zod:
         specifier: ^4.3.6
-        version: 4.4.1
+        version: 4.4.2
     devDependencies:
       '@playwright/test':
         specifier: ^1.58.2
@@ -2945,8 +2945,8 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.4.1:
-    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
+  zod@4.4.2:
+    resolution: {integrity: sha512-IynmDyxsEsb9RKzO3J9+4SxXnl2FTFSzNBaKKaMV6tsSk0rw9gYw9gs+JFCq/qk2LCZ78KDwyj+Z289TijSkUw==}
 
 snapshots:
 
@@ -5636,4 +5636,4 @@ snapshots:
 
   zod@3.25.76: {}
 
-  zod@4.4.1: {}
+  zod@4.4.2: {}
