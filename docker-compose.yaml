@@ -11,7 +11,7 @@ services:
       - valkey
 
   valkey:
-    image: valkey/valkey:9.0.3-alpine
+    image: valkey/valkey:9.0.4-alpine
     ports:
       - '6379:6379'
     restart: unless-stopped
