@@ -2,5 +2,4 @@ allowBuilds:
   esbuild: true
   protobufjs: true
   unrs-resolver: true
-minimumReleaseAge: 1440
-minimumReleaseAgeStrict: false
+minimumReleaseAge: 0
