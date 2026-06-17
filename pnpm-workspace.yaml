@@ -3,3 +3,4 @@ allowBuilds:
   protobufjs: true
   unrs-resolver: true
 minimumReleaseAge: 1440
+minimumReleaseAgeStrict: false
