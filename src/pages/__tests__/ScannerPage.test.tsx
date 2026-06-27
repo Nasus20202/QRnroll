@@ -35,8 +35,8 @@ beforeAll(() => {
 })
 
 let decodeCallback:
-  | ((result: { getText: () => string } | null, err: unknown) => void)
-  | null = null
+  ((result: { getText: () => string } | null, err: unknown) => void) | null =
+  null
 
 // Tracks the deviceId passed to getUserMedia in each startDecoding call.
 const decodeCalls: Array<string> = []

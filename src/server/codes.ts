@@ -3,9 +3,7 @@ import { codePayloadSchema, listCodes, saveCode } from '@/lib/kv'
 import { fanOutWebhooks } from '@/lib/webhooks'
 
 type StoreOutcome =
-  | { status: 'new'; ts: number }
-  | { status: 'duplicate' }
-  | { status: 'error' }
+  { status: 'new'; ts: number } | { status: 'duplicate' } | { status: 'error' }
 
 async function getStoreOutcome(code: string): Promise<StoreOutcome> {
   try {
