@@ -211,8 +211,7 @@ export default function ScannerPage({
 
       const rawTrack = rawStream.getVideoTracks()[0]
       const rawCaps = rawTrack.getCapabilities() as
-        | (MediaTrackCapabilities & { zoom?: ZoomRange })
-        | undefined
+        (MediaTrackCapabilities & { zoom?: ZoomRange }) | undefined
 
       if (rawCaps?.zoom) {
         // Hardware zoom available — feed the raw stream directly to ZXing.
