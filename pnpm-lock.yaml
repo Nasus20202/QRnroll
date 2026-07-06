@@ -43,7 +43,7 @@ importers:
         version: 2.4.2
       '@zxing/browser':
         specifier: ^0.2.0
-        version: 0.2.0(@zxing/library@0.21.3)
+        version: 0.2.1(@zxing/library@0.21.3)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1627,10 +1627,10 @@ packages:
   '@vitest/utils@4.1.10':
     resolution: {integrity: sha512-fy9am/HWxbaGt/Sawrp90vt6Y6jQwf1RX77cz3uwoJwJVMli/e1IEwRPnMNJ7vKfPTwo0diXifkpPvwH9v7nGA==}
 
-  '@zxing/browser@0.2.0':
-    resolution: {integrity: sha512-+ORhrLva0vm6ck74NDCmvYNW3XLoAG81Mu90qfcssN1PBKJjQadxZGeMCcIk+BdJbD/zEAjjHDXOwEK1QCmRtw==}
+  '@zxing/browser@0.2.1':
+    resolution: {integrity: sha512-92pVfVDUXbc15xu9vIEmhNyqIEASMEkDF92CwT6T+7sg2EHXJRktH9CQKoQSXe51UtbNsj+Fm09H/JBWHMs/Sw==}
     peerDependencies:
-      '@zxing/library': ^0.22.0
+      '@zxing/library': ^0.23.0
 
   '@zxing/library@0.21.3':
     resolution: {integrity: sha512-hZHqFe2JyH/ZxviJZosZjV+2s6EDSY0O24R+FQmlWZBZXP9IqMo7S3nb3+2LBWxodJQkSurdQGnqE7KXqrYgow==}
@@ -4294,7 +4294,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@zxing/browser@0.2.0(@zxing/library@0.21.3)':
+  '@zxing/browser@0.2.1(@zxing/library@0.21.3)':
     dependencies:
       '@zxing/library': 0.21.3
     optionalDependencies:
