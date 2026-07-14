@@ -40,7 +40,7 @@ importers:
         version: 1.168.20(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(rolldown@1.1.5)(vite@8.1.4(@types/node@24.13.3)(jiti@2.7.0))
       '@valkey/valkey-glide':
         specifier: ^2.2.7
-        version: 2.4.2
+        version: 2.5.0
       '@zxing/browser':
         specifier: ^0.2.0
         version: 0.2.1(@zxing/library@0.23.0)
@@ -557,8 +557,8 @@ packages:
   '@protobufjs/pool@1.1.0':
     resolution: {integrity: sha512-0kELaGSIDBKvcgS4zkjz1PeddatrjYcmMWOlAuAPwAeccUrPHdUqo/J6LiymHHEiJT5NrF1UVwxY14f+fy4WQw==}
 
-  '@protobufjs/utf8@1.1.1':
-    resolution: {integrity: sha512-oOAWABowe8EAbMyWKM0tYDKi8Yaox52D+HWZhAIJqQXbqe0xI/GV7FhLWqlEKreMkfDjshR5FKgi3mnle0h6Eg==}
+  '@protobufjs/utf8@1.1.2':
+    resolution: {integrity: sha512-b1UQwcEZ4yCnMCD8DAL1VlbvBJE9/IX4FTIp7BG1xYpf29SLazLSrqUkj4w7Y5y7cCVP6E5tcqqcI0xemPkHug==}
 
   '@radix-ui/number@1.1.2':
     resolution: {integrity: sha512-ceTwaxc4I5IOi97DgCotl3pqiyRGvffcc0oOsE2dQYaJOFIDsDt4VWG6xEbg1QePv9QWausCEIppud/tJ1wNig==}
@@ -1548,42 +1548,42 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@valkey/valkey-glide-darwin-arm64@2.4.2':
-    resolution: {integrity: sha512-ILJt4/nGWvzWbrNTUFCvOmUnUoLhOHDKAdCQBTTZtt61JRv4z1ctS8kSkHXtdiwWYCPZIsqjjIsb43HdujkuKQ==}
+  '@valkey/valkey-glide-darwin-arm64@2.5.0':
+    resolution: {integrity: sha512-vI4HhyRHYc9/zdb3ad27/aXQM1S0XzLgDVH8wK25YS962RIaPknlZdNpmoa7sHmBoH8D6wnGkff/AMzJFV6vog==}
     cpu: [arm64]
     os: [darwin]
 
-  '@valkey/valkey-glide-darwin-x64@2.4.2':
-    resolution: {integrity: sha512-qd68iRRAdQ3maWJMgf44JE6v4dk9S5mCWXcRwBa6BzjqzLNoqiHa13lf+YOzaEj4EQEPKz6leBIfQEqIs1ZNMw==}
+  '@valkey/valkey-glide-darwin-x64@2.5.0':
+    resolution: {integrity: sha512-yFsclYqEcfiI5Xi/d9E1dEDg8TfBmDR+nD25bqDfzO09JSc8vxRirSPgGwwCuJ5ZBddY4yLBvO9Gcmlpye9KrQ==}
     cpu: [x64]
     os: [darwin]
 
-  '@valkey/valkey-glide-linux-arm64-gnu@2.4.2':
-    resolution: {integrity: sha512-zzstOJvpXHHZSnwBdkk3J0fz8v3+HjPGa/4PktldBTR5VZ3ZfS5+HFuXdRR6/nNpww5fcTQ0KRYdAONUWDiWsw==}
+  '@valkey/valkey-glide-linux-arm64-gnu@2.5.0':
+    resolution: {integrity: sha512-jp9OFNHh8K/EZRf7OtqD1zT7w+jx4GVKyDJD8SnrXwZ84Tad2amFPorFknOSszT6g0i2842XaGjqpUniQDO9QA==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@valkey/valkey-glide-linux-arm64-musl@2.4.2':
-    resolution: {integrity: sha512-Li7htG1mAikPRN2v9IggIuFED6zGjMRlcYS+42qbNeXRjyYG/V4M4Y0TjAhS2qte6jRqpgCbuyEQSIVt5JSWEQ==}
+  '@valkey/valkey-glide-linux-arm64-musl@2.5.0':
+    resolution: {integrity: sha512-dYsJ1TvyjZGyZGznX82Vbfo3R6WutLUDUz9xuY9XfHx+tPE6hwg0yvZC2GjbHbW0I7xLe+9c1APVm/kHsfVu8A==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@valkey/valkey-glide-linux-x64-gnu@2.4.2':
-    resolution: {integrity: sha512-3cJfKpJSzXgsVwhNdeQcHO73L5K42V1iZaLGpLsXPwtuEO8olSu/tslN24AYgjwTM3QghOQb0k66x6JonB+3rA==}
+  '@valkey/valkey-glide-linux-x64-gnu@2.5.0':
+    resolution: {integrity: sha512-UPHHEfbWlAZ53UlCM4Puq+vAZeOd4QVxP/WrvFSJAVlEVH0fnJrOeGUBH24fVxV9Io1Mb0oZ6HPhwvaRkFhOTA==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@valkey/valkey-glide-linux-x64-musl@2.4.2':
-    resolution: {integrity: sha512-YBPVVW84VSOFfIME6jqE6DAQKiV688oWkhjNmakJ/xm4Pxae78QWNBI0s2Rbwpfy7PQ59gJ/ZfwPVbMHOXp/vw==}
+  '@valkey/valkey-glide-linux-x64-musl@2.5.0':
+    resolution: {integrity: sha512-1zZOZk64WRmDuM9aa9qh2adLHBU+ueptvyZrfECkAiq/eXvmZXNwdcxnQIjsa8vZrZVWDYVdyC1JVkphZzEOYg==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@valkey/valkey-glide@2.4.2':
-    resolution: {integrity: sha512-ugE9hxB+0QoXhix2PgmtJZqWAEFqS8iJsWRqn8dgqdBrOwKUv9LidWuEzF/WBGyYZDj9Ji/g8CvaskA2fHZvTw==}
+  '@valkey/valkey-glide@2.5.0':
+    resolution: {integrity: sha512-61Jz2rcOCRtUzwB0exQXa8bzOzQ7/JvWsgYmR3kjw+C9O0JfiZrqHXSKFkB14rvVEBuUfMmjUPfJ38SfP+Xc7g==}
     engines: {node: '>=16'}
 
   '@vitejs/plugin-react@6.0.3':
@@ -2329,8 +2329,8 @@ packages:
     resolution: {integrity: sha512-Qb1gy5OrP5+zDf2Bvnzdl3jsTf1qXVMazbvCoKhtKqVs4/YK4ozX4gKQJJVyNe+cajNPn0KoC0MC3FUmaHWEmQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
 
-  protobufjs@7.6.4:
-    resolution: {integrity: sha512-RJJPTTpvFfHcWLkIa2JFWK4XvtSzS0yEWDmunqHXli1h3JlkbcQZXDZdcWxv+JK3Xsl5/UFDPZ0iGm7DAengYw==}
+  protobufjs@7.6.5:
+    resolution: {integrity: sha512-/FPD0nUc9jH6rfFjji9IBqOz4pcSE3CsT1m7Ep6Mdb0LxSUMj8hgl6GomOvZzpNpAqqGaXA0P3VSrZLFzIhQrw==}
     engines: {node: '>=12.0.0'}
 
   punycode@2.3.1:
@@ -2424,10 +2424,6 @@ packages:
     engines: {node: '>=10'}
     peerDependencies:
       seroval: ^1.0
-
-  seroval@1.5.4:
-    resolution: {integrity: sha512-46uFvgrXTVxZcUorgSSRZ4y+ieqLLQRMlG4bnCZKW3qI6BZm7Rg4ntMW4p1mILEEBZWrFlcpp0AyIIlM6jD9iw==}
-    engines: {node: '>=10'}
 
   seroval@1.5.5:
     resolution: {integrity: sha512-bSjOuPcwPKLSJNhr9+bZxA20nQxVle5J5MNsYRVE6cIg7KpRLXGupymePavu0jrxlPiPsr4xGZSB8yUY2sH2sw==}
@@ -3199,7 +3195,7 @@ snapshots:
 
   '@protobufjs/pool@1.1.0': {}
 
-  '@protobufjs/utf8@1.1.1': {}
+  '@protobufjs/utf8@1.1.2': {}
 
   '@radix-ui/number@1.1.2': {}
 
@@ -3790,8 +3786,8 @@ snapshots:
     dependencies:
       '@tanstack/history': 1.162.0
       cookie-es: 3.1.1
-      seroval: 1.5.4
-      seroval-plugins: 1.5.4(seroval@1.5.4)
+      seroval: 1.5.5
+      seroval-plugins: 1.5.4(seroval@1.5.5)
 
   '@tanstack/router-devtools-core@1.168.0(@tanstack/router-core@1.171.15)(csstype@3.2.3)':
     dependencies:
@@ -4228,35 +4224,35 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
-  '@valkey/valkey-glide-darwin-arm64@2.4.2':
+  '@valkey/valkey-glide-darwin-arm64@2.5.0':
     optional: true
 
-  '@valkey/valkey-glide-darwin-x64@2.4.2':
+  '@valkey/valkey-glide-darwin-x64@2.5.0':
     optional: true
 
-  '@valkey/valkey-glide-linux-arm64-gnu@2.4.2':
+  '@valkey/valkey-glide-linux-arm64-gnu@2.5.0':
     optional: true
 
-  '@valkey/valkey-glide-linux-arm64-musl@2.4.2':
+  '@valkey/valkey-glide-linux-arm64-musl@2.5.0':
     optional: true
 
-  '@valkey/valkey-glide-linux-x64-gnu@2.4.2':
+  '@valkey/valkey-glide-linux-x64-gnu@2.5.0':
     optional: true
 
-  '@valkey/valkey-glide-linux-x64-musl@2.4.2':
+  '@valkey/valkey-glide-linux-x64-musl@2.5.0':
     optional: true
 
-  '@valkey/valkey-glide@2.4.2':
+  '@valkey/valkey-glide@2.5.0':
     dependencies:
       long: 5.3.2
-      protobufjs: 7.6.4
+      protobufjs: 7.6.5
     optionalDependencies:
-      '@valkey/valkey-glide-darwin-arm64': 2.4.2
-      '@valkey/valkey-glide-darwin-x64': 2.4.2
-      '@valkey/valkey-glide-linux-arm64-gnu': 2.4.2
-      '@valkey/valkey-glide-linux-arm64-musl': 2.4.2
-      '@valkey/valkey-glide-linux-x64-gnu': 2.4.2
-      '@valkey/valkey-glide-linux-x64-musl': 2.4.2
+      '@valkey/valkey-glide-darwin-arm64': 2.5.0
+      '@valkey/valkey-glide-darwin-x64': 2.5.0
+      '@valkey/valkey-glide-linux-arm64-gnu': 2.5.0
+      '@valkey/valkey-glide-linux-arm64-musl': 2.5.0
+      '@valkey/valkey-glide-linux-x64-gnu': 2.5.0
+      '@valkey/valkey-glide-linux-x64-musl': 2.5.0
 
   '@vitejs/plugin-react@6.0.3(vite@8.1.4(@types/node@24.13.3)(jiti@2.7.0))':
     dependencies:
@@ -4962,7 +4958,7 @@ snapshots:
       ansi-styles: 5.2.0
       react-is: 17.0.2
 
-  protobufjs@7.6.4:
+  protobufjs@7.6.5:
     dependencies:
       '@protobufjs/aspromise': 1.1.2
       '@protobufjs/base64': 1.1.2
@@ -4972,7 +4968,7 @@ snapshots:
       '@protobufjs/float': 1.0.2
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
-      '@protobufjs/utf8': 1.1.1
+      '@protobufjs/utf8': 1.1.2
       '@types/node': 24.13.3
       long: 5.3.2
 
@@ -5055,11 +5051,9 @@ snapshots:
 
   semver@7.8.5: {}
 
-  seroval-plugins@1.5.4(seroval@1.5.4):
+  seroval-plugins@1.5.4(seroval@1.5.5):
     dependencies:
-      seroval: 1.5.4
-
-  seroval@1.5.4: {}
+      seroval: 1.5.5
 
   seroval@1.5.5: {}
 
@@ -5076,8 +5070,8 @@ snapshots:
   solid-js@1.9.11:
     dependencies:
       csstype: 3.2.3
-      seroval: 1.5.4
-      seroval-plugins: 1.5.4(seroval@1.5.4)
+      seroval: 1.5.5
+      seroval-plugins: 1.5.4(seroval@1.5.5)
 
   source-map-js@1.2.1: {}
 
