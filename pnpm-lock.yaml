@@ -101,7 +101,7 @@ importers:
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       '@vitejs/plugin-react':
         specifier: ^6.0.0
-        version: 6.0.3(vite@8.1.5(@types/node@24.13.3)(jiti@2.7.0))
+        version: 6.0.4(vite@8.1.5(@types/node@24.13.3)(jiti@2.7.0))
       '@vitest/coverage-v8':
         specifier: ^4.1.0
         version: 4.1.10(vitest@4.1.10)
@@ -1586,8 +1586,8 @@ packages:
     resolution: {integrity: sha512-61Jz2rcOCRtUzwB0exQXa8bzOzQ7/JvWsgYmR3kjw+C9O0JfiZrqHXSKFkB14rvVEBuUfMmjUPfJ38SfP+Xc7g==}
     engines: {node: '>=16'}
 
-  '@vitejs/plugin-react@6.0.3':
-    resolution: {integrity: sha512-vmFvco5/QuC2f9Oj+wTk0+9XeDFkHxSamwZKYc7MxYwKICfvUvlMhqKI0VuICPltGqh1neqBKDvO4kes1ya8vg==}
+  '@vitejs/plugin-react@6.0.4':
+    resolution: {integrity: sha512-XcCQz0TBpBgljhj0gMuuDj49i6Ytqh5q1osT/Gp5uAVJUCTWxyskk/l1jwYYiu2xcNHHipdMz40EGfM1VdamVg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@rolldown/plugin-babel': ^0.1.7 || ^0.2.0
@@ -4252,7 +4252,7 @@ snapshots:
       '@valkey/valkey-glide-linux-x64-gnu': 2.5.0
       '@valkey/valkey-glide-linux-x64-musl': 2.5.0
 
-  '@vitejs/plugin-react@6.0.3(vite@8.1.5(@types/node@24.13.3)(jiti@2.7.0))':
+  '@vitejs/plugin-react@6.0.4(vite@8.1.5(@types/node@24.13.3)(jiti@2.7.0))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.1.5(@types/node@24.13.3)(jiti@2.7.0)
