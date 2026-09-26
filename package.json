@@ -2,7 +2,7 @@
   "name": "qrnroll",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.5.1",
+  "packageManager": "pnpm@12.6.0",
   "imports": {
     "@/*": "./src/*"
   },
