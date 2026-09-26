@@ -47,7 +47,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'pnpm dev',
+    command: 'node_modules/.bin/vite dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
     env: process.env.VALKEY_URL
