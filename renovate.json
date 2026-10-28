@@ -1,4 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>Nasus20202/renovate"]
+  "extends": ["github>Nasus20202/renovate"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track the corepack version pinned in Dockerfile ARG via a renovate annotation",
+      "managerFilePatterns": ["/(^|/)Dockerfile$/"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)\\s*\\n\\s*ARG\\s+\\w+=(?<currentValue>[^\\s]+)"
+      ]
+    }
+  ]
 }
