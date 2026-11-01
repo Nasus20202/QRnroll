@@ -231,8 +231,8 @@ importers:
         specifier: 1.64.1
         version: 1.64.1
       '@tanstack/devtools-vite':
-        specifier: 0.8.5
-        version: 0.8.5(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(vite@8.3.5(@types/node@26.6.6)(jiti@2.7.0))
+        specifier: 0.8.6
+        version: 0.8.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(vite@8.3.5(@types/node@26.6.6)(jiti@2.7.0))
       '@tanstack/eslint-config':
         specifier: 0.4.0
         version: 0.4.0(@typescript-eslint/utils@8.72.1(@typescript/typescript6@6.0.2)(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0))(@typescript/typescript6@6.0.2)(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
@@ -1194,8 +1194,8 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
-  '@tanstack/devtools-bundler-core@0.1.3':
-    resolution: {integrity: sha512-F0tlxIyfFqXkZ1mJP1EjtkiSeJA+ztXY2AYOHf7r4goCIEAOp86N9PFJ/yv8vu1TnmxGS6vKsZCS3Kyls9xQQA==}
+  '@tanstack/devtools-bundler-core@0.1.4':
+    resolution: {integrity: sha512-NaDbpESGyGLV4XPbLsL1b7XeGnYovbnRjoTZ9LoAwllaaposdcrgtBsAcbdr0n4p+mltEVrUB6AFpvAmjj0VGQ==}
     engines: {node: '>=18'}
 
   '@tanstack/devtools-client@0.0.8':
@@ -1217,10 +1217,9 @@ packages:
     peerDependencies:
       solid-js: '>=1.9.7'
 
-  '@tanstack/devtools-vite@0.8.5':
-    resolution: {integrity: sha512-xaifCEmiwwzizlbp973oISXNsnmuU/BugLa66gryAZaPJJ/qo1kJd2DxY5X960eHwmyIS3SN0KYrL3/aRhucmA==}
+  '@tanstack/devtools-vite@0.8.6':
+    resolution: {integrity: sha512-CkaVqh3P7cJmQ6mMIxQfEmmR8gwlmgRCcoiWOMLigHaPobrrwTqsZvKqvYRHBybZ3ZT1ZSBj5TwlP7ukJJcRlg==}
     engines: {node: '>=18'}
-    hasBin: true
     peerDependencies:
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
 
@@ -3927,7 +3926,7 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.3.5(@types/node@26.6.6)(jiti@2.7.0)
 
-  '@tanstack/devtools-bundler-core@0.1.3(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
+  '@tanstack/devtools-bundler-core@0.1.4(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:
       '@tanstack/devtools-client': 0.0.8
       '@tanstack/devtools-event-bus': 0.4.3
@@ -3935,7 +3934,7 @@ snapshots:
       launch-editor: 2.14.1
       magic-string: 0.30.21
       oxc-parser: 0.120.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
-      picomatch: 4.0.5
+      picomatch: 4.0.7
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -3964,9 +3963,9 @@ snapshots:
     transitivePeerDependencies:
       - csstype
 
-  '@tanstack/devtools-vite@0.8.5(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(vite@8.3.5(@types/node@26.6.6)(jiti@2.7.0))':
+  '@tanstack/devtools-vite@0.8.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(vite@8.3.5(@types/node@26.6.6)(jiti@2.7.0))':
     dependencies:
-      '@tanstack/devtools-bundler-core': 0.1.3(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
+      '@tanstack/devtools-bundler-core': 0.1.4(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
       '@tanstack/devtools-client': 0.0.8
       '@tanstack/devtools-event-bus': 0.4.3
       chalk: 5.6.2
