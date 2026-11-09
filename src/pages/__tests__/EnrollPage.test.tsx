@@ -12,7 +12,7 @@ describe('EnrollPage', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     fetchCodes.mockResolvedValue([])
-    window.open = openSpy as unknown as typeof window.open
+    window.open = openSpy
   })
 
   afterEach(() => {

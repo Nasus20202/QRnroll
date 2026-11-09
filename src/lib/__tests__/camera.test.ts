@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { pickRearDeviceIndex } from '@/lib/camera'
 
-const makeDevice = (deviceId: string, label: string): MediaDeviceInfo =>
-  ({
-    deviceId,
-    label,
-    kind: 'videoinput' as const,
-    groupId: '',
-    toJSON: () => ({}),
-  }) as MediaDeviceInfo
+const makeDevice = (deviceId: string, label: string): MediaDeviceInfo => ({
+  deviceId,
+  label,
+  kind: 'videoinput' as const,
+  groupId: '',
+  toJSON: () => ({}),
+})
 
 describe('pickRearDeviceIndex', () => {
   const front = makeDevice('front-id', 'Front Camera')

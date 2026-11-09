@@ -45,7 +45,7 @@ describe('fanOutWebhooks', () => {
 
   it('posts to all targets and reports success', async () => {
     const fetchMock = vi.fn()
-    globalThis.fetch = fetchMock as unknown as typeof fetch
+    globalThis.fetch = fetchMock
 
     fetchMock.mockResolvedValue(new Response('ok', { status: 200 }))
 
