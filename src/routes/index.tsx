@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import type { ScannerPageProps } from '@/pages/ScannerPage'
-import type { SubmitResponse } from '@/server/codes'
 import ScannerPage from '@/pages/ScannerPage'
 import { getCodes, postCode } from '@/server/codes'
+import type { ScannerPageProps } from '@/pages/ScannerPage'
+import type { SubmitResponse } from '@/server/codes'
 
 type PostCodeArgs = Parameters<typeof postCode>[0]
 type PostCodeData = { data: { code: string } }

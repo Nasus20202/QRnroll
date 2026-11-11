@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 
-import type { CodeItem } from '@/pages/ScannerPage'
 import { CodesList } from '@/components/CodesList'
+import type { CodeItem } from '@/pages/ScannerPage'
 
 describe('CodesList', () => {
   afterEach(() => cleanup())

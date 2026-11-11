@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
-import type {
-  CodeItem,
-  Status,
-  StatusKind,
-  SubmitResult,
-  ZoomRange,
-} from '@/lib/scanner'
 import { CameraPanel } from '@/components/CameraPanel'
 import { CodesList } from '@/components/CodesList'
 import { PageHero } from '@/components/PageHero'
@@ -16,6 +9,13 @@ import {
   SCAN_COOLDOWN_MS,
   SOFTWARE_ZOOM_RANGE,
   isIgnorableDecodeError,
+} from '@/lib/scanner'
+import type {
+  CodeItem,
+  Status,
+  StatusKind,
+  SubmitResult,
+  ZoomRange,
 } from '@/lib/scanner'
 
 export type { CodeItem, Status, StatusKind, SubmitResult, ZoomRange }

@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { KvBackend } from '@/lib/kv'
 import {
   CircuitBreakerKv,
   DEFAULT_RECOVERY_MS,
   DEFAULT_THRESHOLD,
 } from '@/lib/kv/circuit-breaker'
+import type { KvBackend } from '@/lib/kv'
 
 // ---------------------------------------------------------------------------
 // Helpers
