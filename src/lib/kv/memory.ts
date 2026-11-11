@@ -1,5 +1,5 @@
-import type { KvBackend, StoredCode } from '@/lib/kv'
 import { TTL_SECONDS } from '@/lib/kv'
+import type { KvBackend, StoredCode } from '@/lib/kv'
 
 const CODE_PREFIX = 'code:'
 const buildKey = (code: string) => `${CODE_PREFIX}${encodeURIComponent(code)}`

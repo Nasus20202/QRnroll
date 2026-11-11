@@ -9,9 +9,9 @@ import {
   SwitchCamera,
 } from 'lucide-react'
 import * as Slider from '@radix-ui/react-slider'
+import { calcZoomStep, clampZoom } from '@/lib/scanner'
 import type { RefObject } from 'react'
 import type { Status, ZoomRange } from '@/lib/scanner'
-import { calcZoomStep, clampZoom } from '@/lib/scanner'
 
 export type CameraPanelProps = {
   videoRef: RefObject<HTMLVideoElement | null>

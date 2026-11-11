@@ -3,8 +3,8 @@ import {
   GlideClient,
   InfBoundary,
 } from '@valkey/valkey-glide'
-import type { KvBackend, StoredCode } from '@/lib/kv'
 import { TTL_SECONDS } from '@/lib/kv'
+import type { KvBackend, StoredCode } from '@/lib/kv'
 
 const CODES_KEY = 'codes'
 

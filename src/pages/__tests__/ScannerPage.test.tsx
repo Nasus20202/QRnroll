@@ -14,9 +14,9 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react'
+import ScannerPage from '@/pages/ScannerPage'
 import type { Mock } from 'vitest'
 import type { CodeItem, ScannerPageProps } from '@/pages/ScannerPage'
-import ScannerPage from '@/pages/ScannerPage'
 
 // jsdom's HTMLVideoElement.srcObject setter rejects plain objects.
 // Override it with a WeakMap-backed getter/setter so tests can simulate
